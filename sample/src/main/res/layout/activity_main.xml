@@ -17,7 +17,7 @@
         android:paddingBottom="40dp"
         app:exampleDimension="24sp"
         app:exampleColor="#33b5e5"
-        app:exampleString="Hello, MyView"
+        app:text="Hello, MyView"
         app:markerCount="20" />
 
 

@@ -1,10 +1,10 @@
 package com.sababado.circularview;
 
 import android.animation.Animator;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.database.DataSetObserver;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -23,7 +23,7 @@ import java.util.ArrayList;
  */
 public class CircularView extends View {
     private static final String TAG = CircularView.class.getSimpleName();
-    private String mText; // TODO: use a default from R.string...
+    private String mText; //TODO add customization for the text (style, color, etc)
     private int mExampleColor = Color.RED; // TODO: use a default from R.color...
     private float mExampleDimension = 0; // TODO: use a default from R.dimen...
     private Drawable mExampleDrawable;
@@ -37,6 +37,11 @@ public class CircularView extends View {
     private static final float CIRCLE_TO_MARKER_PADDING = 20f;
     private float mMarkerRadius = 15;
     private int mMarkerCount = 0;
+    private float mMarkerStartingPoint;
+
+    private CircularViewAdapter mAdapter;
+    private AdapterDataSetObserver mAdapterDataSetObserver;
+
     private ArrayList<Marker> mMarkerList;
     private Marker mCircle;
     private float highlightedDegree;
@@ -51,6 +56,11 @@ public class CircularView extends View {
 
     private int mWidth;
     private int mHeight;
+
+    public static final int TOP = 270;
+    public static final int BOTTOM = 90;
+    public static final int LEFT = 180;
+    public static final int RIGHT = R.styleable.CircularView_markerStartingPoint;
 
     public CircularView(Context context) {
         super(context);
@@ -68,6 +78,8 @@ public class CircularView extends View {
     }
 
     private void init(AttributeSet attrs, int defStyle) {
+        mAdapterDataSetObserver = new AdapterDataSetObserver();
+
         // Load attributes
         final TypedArray a = getContext().obtainStyledAttributes(
                 attrs, R.styleable.CircularView, defStyle, 0);
@@ -127,7 +139,7 @@ public class CircularView extends View {
         if (mMarkerList != null) {
             mMarkerList.clear();
         } else {
-            mMarkerList = new ArrayList<Marker>(mMarkerCount);
+            mMarkerList = new ArrayList(mMarkerCount);
         }
         final float degreeInterval = 360.0f / mMarkerCount;
         final float radiusFromCenter = circleRadius + CIRCLE_TO_MARKER_PADDING + mMarkerRadius;
@@ -224,22 +236,38 @@ public class CircularView extends View {
     }
 
     /**
-     * Gets the example string attribute value.
-     *
-     * @return The example string attribute value.
+     * Set the adapter to use on this view.
+     * @param adapter Adapter to set.
      */
-    public String getExampleString() {
+    public void setAdapter(final CircularViewAdapter adapter) {
+        mAdapter = adapter;
+    }
+
+    /**
+     * Get the adapter that has been set on this view.
+     * @return
+     * @see #setAdapter(CircularViewAdapter)
+     */
+    public CircularViewAdapter getAdapter() {
+        return mAdapter;
+    }
+
+    /**
+     * Gets the text for this view.
+     *
+     * @return The text for this view.
+     */
+    public String getText() {
         return mText;
     }
 
     /**
-     * Sets the view's example string attribute value. In the example view, this string
-     * is the text to draw.
+     * Sets the view's text.
      *
-     * @param exampleString The example string attribute value to use.
+     * @param text The view's text.
      */
-    public void setExampleString(String exampleString) {
-        mText = exampleString;
+    public void setText(String text) {
+        mText = text;
         invalidateTextPaintAndMeasurements();
     }
 
@@ -319,86 +347,6 @@ public class CircularView extends View {
         invalidate();
     }
 
-    private static float nextId = 0;
-
-    private class Marker {
-        float x;
-        float y;
-        float radius;
-        float sectionMin;
-        float sectionMax;
-        //TODO The ID can be removed eventually
-        float id;
-
-        private Marker(float x, float y, float radius) {
-            this.x = x;
-            this.y = y;
-            this.radius = radius;
-            id = nextId++;
-        }
-
-        private Marker(float x, float y, float radius, float sectionMin, float sectionMax) {
-            this(x, y, radius);
-            this.sectionMin = sectionMin;
-            this.sectionMax = sectionMax;
-        }
-
-        private void draw(final Canvas canvas, final float radius, final Paint paint) {
-            canvas.drawCircle(x, y, radius, paint);
-//            mTextPaint.setColor(Color.BLACK);
-//            canvas.drawText(String.valueOf(id), x, y, mTextPaint);
-//            mTextPaint.setColor(mExampleColor);
-        }
-
-        private void draw(final Canvas canvas, final Paint paint) {
-            draw(canvas, this.radius, paint);
-        }
-
-        public float getX() {
-            return x;
-        }
-
-        public void setX(float x) {
-            this.x = x;
-        }
-
-        public float getY() {
-            return y;
-        }
-
-        public void setY(float y) {
-            this.y = y;
-        }
-
-        public boolean hasInSection(final float x) {
-            if (sectionMin <= sectionMax) {
-                return x <= sectionMax && x >= sectionMin;
-            }
-            final float endDifference = 360f - sectionMin;
-            return (x <= sectionMax && x >= -endDifference) ||
-                    (x <= sectionMax + endDifference + sectionMin && x >= sectionMin);
-        }
-
-        public void animate() {
-            AnimatorSet animatorSet = new AnimatorSet();
-            animatorSet.playSequentially(
-                    ObjectAnimator.ofFloat(this, "x", x + 50).setDuration(500),
-                    ObjectAnimator.ofFloat(this, "x", x - 50).setDuration(500));
-        }
-
-        @Override
-        public String toString() {
-            return "Marker{" +
-                    "x=" + x +
-                    ", y=" + y +
-                    ", radius=" + radius +
-                    ", sectionMin=" + sectionMin +
-                    ", sectionMax=" + sectionMax +
-                    ", id=" + id +
-                    '}';
-        }
-    }
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -465,4 +413,35 @@ public class CircularView extends View {
 //            }
 //        }
 //    };
+
+    /**
+     * Get the starting point for the markers.
+     * @return The starting point for the markers.
+     */
+    public float getMarkerStartingPoint() {
+        return mMarkerStartingPoint;
+    }
+
+    /**
+     * Set the starting point for the markers
+     * @param startingPoint Starting point for the markers
+     */
+    public void setMarkerStartingPoint(final float startingPoint) {
+        mMarkerStartingPoint = startingPoint;
+    }
+
+    class AdapterDataSetObserver extends DataSetObserver {
+        @Override
+        public void onChanged() {
+            invalidate();
+        }
+
+        /**
+         * Does the same thing as {@link #onChanged()}.
+         */
+        @Override
+        public void onInvalidated() {
+            onChanged();
+        }
+    }
 }

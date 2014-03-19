@@ -6,5 +6,11 @@
         <attr name="exampleColor" format="color" />
         <attr name="exampleDrawable" format="color|reference" />
         <attr name="markerCount" format="integer" />
+        <attr name="markerStartingPoint" format="enum">
+            <enum name="top" value="270" />
+            <enum name="bottom" value="90" />
+            <enum name="left" value="180" />
+            <enum name="right" value="0" />
+        </attr>
     </declare-styleable>
 </resources>
