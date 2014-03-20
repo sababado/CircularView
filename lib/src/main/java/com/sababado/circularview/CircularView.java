@@ -42,8 +42,8 @@ public class CircularView extends View {
     private CircularViewAdapter mAdapter;
     private AdapterDataSetObserver mAdapterDataSetObserver;
 
-    private ArrayList<Marker> mMarkerList;
-    private Marker mCircle;
+    private ArrayList<MarkerView> mMarkerViewList;
+    private MarkerView mCircle;
     private float highlightedDegree;
     private boolean isAnimating;
 
@@ -133,13 +133,13 @@ public class CircularView extends View {
         Log.v(TAG, "shortDimensinon: " + shortDimension);
         final float circleRadius = (shortDimension * CIRCLE_WEIGHT_LONG_ORIENTATION - mMarkerRadius * 4f - CIRCLE_TO_MARKER_PADDING * 2f) / 2f;
         final float circleCenter = shortDimension / 2f;
-        mCircle = new Marker(getContext(), circleCenter, circleCenter, circleRadius);
+        mCircle = new MarkerView(getContext(), circleCenter, circleCenter, circleRadius);
 
         // init marker dimens
-        if (mMarkerList != null) {
-            mMarkerList.clear();
+        if (mMarkerViewList != null) {
+            mMarkerViewList.clear();
         } else {
-            mMarkerList = new ArrayList(mMarkerCount);
+            mMarkerViewList = new ArrayList(mMarkerCount);
         }
         final float degreeInterval = 360.0f / mMarkerCount;
         final float radiusFromCenter = circleRadius + CIRCLE_TO_MARKER_PADDING + mMarkerRadius;
@@ -148,16 +148,16 @@ public class CircularView extends View {
             final float actualDegree = normalizeDegree(i + 90f);
             final double rad = Math.toRadians(actualDegree);
             final float sectionMin = actualDegree - degreeInterval / 2f;
-            final Marker marker = new Marker(
+            final MarkerView markerView = new MarkerView(
                     getContext(),
                     (float) (radiusFromCenter * Math.cos(rad)) + circleCenter,
                     (float) (radiusFromCenter * Math.sin(rad)) + circleCenter,
                     mMarkerRadius,
                     normalizeDegree(sectionMin),
                     normalizeDegree(sectionMin + degreeInterval));
-            marker.setSrc(R.drawable.ic_launcher);
-            mMarkerList.add(marker);
-            Log.v(TAG, "marker: " + marker);
+            markerView.setSrc(R.drawable.ic_launcher);
+            mMarkerViewList.add(markerView);
+            Log.v(TAG, "markerView: " + markerView);
         }
     }
 
@@ -203,18 +203,21 @@ public class CircularView extends View {
         mCirclePaint.setStyle(Paint.Style.FILL);
         mCirclePaint.setColor(Color.RED);
         // Draw Circle
-        mCircle.draw(canvas, mCirclePaint);
+        mCircle.draw(canvas);
         // Draw Markers
-        if (mMarkerList != null && !mMarkerList.isEmpty()) {
+        if (mMarkerViewList != null && !mMarkerViewList.isEmpty()) {
             mCirclePaint.setStyle(Paint.Style.STROKE);
             mCirclePaint.setColor(Color.BLUE);
-            for (final Marker marker : mMarkerList) {
-                if (isAnimating && marker.hasInSection(highlightedDegree % 360)) {
+            for (final MarkerView markerView : mMarkerViewList) {
+                if (isAnimating && markerView.hasInSection(highlightedDegree % 360)) {
+                    if(!markerView.isAnimating()) {
+                        markerView.animateMe();
+                    }
                     mCirclePaint.setStyle(Paint.Style.FILL);
-                    marker.draw(canvas, marker.radius + 8, null);
+                    markerView.draw(canvas);
                     mCirclePaint.setStyle(Paint.Style.STROKE);
                 } else {
-                    marker.draw(canvas, null);
+                    markerView.draw(canvas);
                 }
             }
         }
@@ -222,8 +225,8 @@ public class CircularView extends View {
         // Draw the text.
         if (isAnimating) {
             canvas.drawText(String.valueOf(highlightedDegree),
-                    mCircle.x - mTextWidth / 2f,
-                    mCircle.y - mTextHeight / 2f,
+                    mCircle.getX() - mTextWidth / 2f,
+                    mCircle.getY() - mTextHeight / 2f,
 //                paddingLeft + (contentWidth - mTextWidth) / 2,
 //                paddingTop + (contentHeight + mTextHeight) / 2,
                     mTextPaint);
@@ -399,14 +402,14 @@ public class CircularView extends View {
 //        @Override
 //        public void run() {
 //            Log.v(TAG, "running animation: " + mCurrentAnimatingMarker);
-//            if (mMarkerList != null && !mMarkerList.isEmpty()) {
+//            if (mMarkerViewList != null && !mMarkerViewList.isEmpty()) {
 //                Log.v(TAG, "running animation: list is good");
 ////                if (mCurrentAnimatingMarker > 0) {
-////                    mMarkerList.get(mCurrentAnimatingMarker - 1).animate(false);
+////                    mMarkerViewList.get(mCurrentAnimatingMarker - 1).animate(false);
 ////                }
-//                final int size = mMarkerList.size();
+//                final int size = mMarkerViewList.size();
 //                if (mCurrentAnimatingMarker < size) {
-//                    mMarkerList.get(mCurrentAnimatingMarker).animate();
+//                    mMarkerViewList.get(mCurrentAnimatingMarker).animate();
 //                }
 //                mCurrentAnimatingMarker++;
 //                if (mCurrentAnimatingMarker < size) {

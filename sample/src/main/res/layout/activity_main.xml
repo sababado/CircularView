@@ -18,7 +18,7 @@
         app:exampleDimension="24sp"
         app:exampleColor="#33b5e5"
         app:text="Hello, MyView"
-        app:markerCount="20" />
+        app:markerCount="15" />
 
 
 </RelativeLayout>
