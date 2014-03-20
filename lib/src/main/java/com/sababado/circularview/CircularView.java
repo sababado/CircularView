@@ -133,7 +133,7 @@ public class CircularView extends View {
         Log.v(TAG, "shortDimensinon: " + shortDimension);
         final float circleRadius = (shortDimension * CIRCLE_WEIGHT_LONG_ORIENTATION - mMarkerRadius * 4f - CIRCLE_TO_MARKER_PADDING * 2f) / 2f;
         final float circleCenter = shortDimension / 2f;
-        mCircle = new Marker(circleCenter, circleCenter, circleRadius);
+        mCircle = new Marker(getContext(), circleCenter, circleCenter, circleRadius);
 
         // init marker dimens
         if (mMarkerList != null) {
@@ -149,11 +149,13 @@ public class CircularView extends View {
             final double rad = Math.toRadians(actualDegree);
             final float sectionMin = actualDegree - degreeInterval / 2f;
             final Marker marker = new Marker(
+                    getContext(),
                     (float) (radiusFromCenter * Math.cos(rad)) + circleCenter,
                     (float) (radiusFromCenter * Math.sin(rad)) + circleCenter,
                     mMarkerRadius,
                     normalizeDegree(sectionMin),
                     normalizeDegree(sectionMin + degreeInterval));
+            marker.setSrc(R.drawable.ic_launcher);
             mMarkerList.add(marker);
             Log.v(TAG, "marker: " + marker);
         }
@@ -209,10 +211,10 @@ public class CircularView extends View {
             for (final Marker marker : mMarkerList) {
                 if (isAnimating && marker.hasInSection(highlightedDegree % 360)) {
                     mCirclePaint.setStyle(Paint.Style.FILL);
-                    marker.draw(canvas, marker.radius + 8, mCirclePaint);
+                    marker.draw(canvas, marker.radius + 8, null);
                     mCirclePaint.setStyle(Paint.Style.STROKE);
                 } else {
-                    marker.draw(canvas, mCirclePaint);
+                    marker.draw(canvas, null);
                 }
             }
         }
