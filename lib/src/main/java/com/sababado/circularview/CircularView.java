@@ -336,7 +336,6 @@ public class CircularView extends View {
     }
 
     public float getHighlightedDegree() {
-        Log.v(TAG, "animation: in getHighlightedDegree: " + highlightedDegree);
         return highlightedDegree;
     }
 
@@ -347,7 +346,6 @@ public class CircularView extends View {
      */
     public void setHighlightedDegree(float highlightedDegree) {
         this.highlightedDegree = highlightedDegree;
-        Log.v(TAG, "animation: in setHighlightedDegree: " + highlightedDegree);
         invalidateTextPaintAndMeasurements();
         invalidate();
     }
