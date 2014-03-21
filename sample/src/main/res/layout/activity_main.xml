@@ -10,6 +10,7 @@
     tools:context="com.sababado.circularview.sample.MainActivity">
 
     <com.sababado.circularview.CircularView
+        android:id="@+id/circular_view"
         android:background="#ccc"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

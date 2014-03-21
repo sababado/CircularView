@@ -1,10 +1,13 @@
 package com.sababado.circularview;
 
 import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -15,6 +18,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.BaseAdapter;
 
 import java.util.ArrayList;
 
@@ -36,14 +40,14 @@ public class CircularView extends View {
     private static final float CIRCLE_WEIGHT_LONG_ORIENTATION = 0.8f;
     private static final float CIRCLE_TO_MARKER_PADDING = 20f;
     private float mMarkerRadius = 15;
-    private int mMarkerCount = 0;
     private float mMarkerStartingPoint;
 
     private CircularViewAdapter mAdapter;
-    private AdapterDataSetObserver mAdapterDataSetObserver;
+    private final AdapterDataSetObserver mAdapterDataSetObserver = new AdapterDataSetObserver();
 
-    private ArrayList<MarkerView> mMarkerViewList;
-    private MarkerView mCircle;
+    private ArrayList<Marker> mMarkerList;
+    private Marker mCircle;
+    private float mCircleCenter;
     private float highlightedDegree;
     private boolean isAnimating;
 
@@ -60,7 +64,7 @@ public class CircularView extends View {
     public static final int TOP = 270;
     public static final int BOTTOM = 90;
     public static final int LEFT = 180;
-    public static final int RIGHT = R.styleable.CircularView_markerStartingPoint;
+    public static final int RIGHT = 0;
 
     public CircularView(Context context) {
         super(context);
@@ -78,8 +82,6 @@ public class CircularView extends View {
     }
 
     private void init(AttributeSet attrs, int defStyle) {
-        mAdapterDataSetObserver = new AdapterDataSetObserver();
-
         // Load attributes
         final TypedArray a = getContext().obtainStyledAttributes(
                 attrs, R.styleable.CircularView, defStyle, 0);
@@ -89,7 +91,6 @@ public class CircularView extends View {
         mExampleColor = a.getColor(
                 R.styleable.CircularView_exampleColor,
                 mExampleColor);
-        mMarkerCount = a.getInt(R.styleable.CircularView_markerCount, 0);
         // Use getDimensionPixelSize or getDimensionPixelOffset when dealing with
         // values that should fall on pixel boundaries.
         mExampleDimension = a.getDimension(
@@ -132,33 +133,8 @@ public class CircularView extends View {
                 mWidth = getMeasuredWidth());
         Log.v(TAG, "shortDimensinon: " + shortDimension);
         final float circleRadius = (shortDimension * CIRCLE_WEIGHT_LONG_ORIENTATION - mMarkerRadius * 4f - CIRCLE_TO_MARKER_PADDING * 2f) / 2f;
-        final float circleCenter = shortDimension / 2f;
-        mCircle = new MarkerView(getContext(), circleCenter, circleCenter, circleRadius);
-
-        // init marker dimens
-        if (mMarkerViewList != null) {
-            mMarkerViewList.clear();
-        } else {
-            mMarkerViewList = new ArrayList(mMarkerCount);
-        }
-        final float degreeInterval = 360.0f / mMarkerCount;
-        final float radiusFromCenter = circleRadius + CIRCLE_TO_MARKER_PADDING + mMarkerRadius;
-        // loop clockwise
-        for (float i = 0; i < 360f; i += degreeInterval) {
-            final float actualDegree = normalizeDegree(i + 90f);
-            final double rad = Math.toRadians(actualDegree);
-            final float sectionMin = actualDegree - degreeInterval / 2f;
-            final MarkerView markerView = new MarkerView(
-                    getContext(),
-                    (float) (radiusFromCenter * Math.cos(rad)) + circleCenter,
-                    (float) (radiusFromCenter * Math.sin(rad)) + circleCenter,
-                    mMarkerRadius,
-                    normalizeDegree(sectionMin),
-                    normalizeDegree(sectionMin + degreeInterval));
-            markerView.setSrc(R.drawable.ic_launcher);
-            mMarkerViewList.add(markerView);
-            Log.v(TAG, "markerView: " + markerView);
-        }
+        mCircleCenter = shortDimension / 2f;
+        mCircle = new Marker(getContext(), mCircleCenter, mCircleCenter, circleRadius);
     }
 
     /**
@@ -181,6 +157,65 @@ public class CircularView extends View {
         paddingTop = getPaddingTop();
         paddingRight = getPaddingRight();
         paddingBottom = getPaddingBottom();
+        setupMarkerList();
+    }
+
+    private void setupMarkerList() {
+        if (mAdapter != null) {
+            // init marker dimens
+            final int markerCount = mAdapter.getCount();
+            assert (markerCount >= 0);
+            if (mMarkerList == null) {
+                mMarkerList = new ArrayList(markerCount);
+            }
+            final int markerViewListSize = mMarkerList.size();
+            final float degreeInterval = 360.0f / markerCount;
+            final float radiusFromCenter = mCircle.getRadius() + CIRCLE_TO_MARKER_PADDING + mMarkerRadius;
+            int position = 0;
+            // loop clockwise
+            for (float i = 0; i < 360f; i += degreeInterval) {
+                final boolean isExistingPositionInList = position < markerViewListSize;
+                final float actualDegree = normalizeDegree(i + 90f);
+                final double rad = Math.toRadians(actualDegree);
+                final float sectionMin = actualDegree - degreeInterval / 2f;
+
+                // get the old marker view if it exists.
+                final Marker oldMarker;
+                if (isExistingPositionInList) {
+                    oldMarker = mMarkerList.get(position);
+                } else {
+                    oldMarker = null;
+                }
+
+                // get the new marker view.
+                final Marker newMarker = mAdapter.getMarker(position, oldMarker);
+                assert (newMarker != null);
+
+//                final Marker markerView = new Marker(
+//                        getContext(),
+//                        (float) (radiusFromCenter * Math.cos(rad)) + mCircleCenter,
+//                        (float) (radiusFromCenter * Math.sin(rad)) + mCircleCenter,
+//                        mMarkerRadius,
+//                        normalizeDegree(sectionMin),
+//                        normalizeDegree(sectionMin + degreeInterval));
+                newMarker.init(
+                        (float) (radiusFromCenter * Math.cos(rad)) + mCircleCenter,
+                        (float) (radiusFromCenter * Math.sin(rad)) + mCircleCenter,
+                        mMarkerRadius,
+                        normalizeDegree(sectionMin),
+                        normalizeDegree(sectionMin + degreeInterval),
+                        mAdapterDataSetObserver);
+//                markerView.setSrc(R.drawable.ic_launcher);
+                if (isExistingPositionInList) {
+                    mMarkerList.set(position, newMarker);
+                } else {
+                    mMarkerList.add(newMarker);
+                }
+//                Log.v(TAG, "markerView: " + markerView);
+                position++;
+            }
+            mMarkerList.trimToSize();
+        }
     }
 
     private void invalidateTextPaintAndMeasurements() {
@@ -205,19 +240,19 @@ public class CircularView extends View {
         // Draw Circle
         mCircle.draw(canvas);
         // Draw Markers
-        if (mMarkerViewList != null && !mMarkerViewList.isEmpty()) {
+        if (mMarkerList != null && !mMarkerList.isEmpty()) {
             mCirclePaint.setStyle(Paint.Style.STROKE);
             mCirclePaint.setColor(Color.BLUE);
-            for (final MarkerView markerView : mMarkerViewList) {
-                if (isAnimating && markerView.hasInSection(highlightedDegree % 360)) {
-                    if(!markerView.isAnimating()) {
-                        markerView.animateMe();
+            for (final Marker marker : mMarkerList) {
+                if (isAnimating && marker.hasInSection(highlightedDegree % 360)) {
+                    if (!marker.isAnimating()) {
+                        marker.animate();
                     }
                     mCirclePaint.setStyle(Paint.Style.FILL);
-                    markerView.draw(canvas);
+                    marker.draw(canvas);
                     mCirclePaint.setStyle(Paint.Style.STROKE);
                 } else {
-                    markerView.draw(canvas);
+                    marker.draw(canvas);
                 }
             }
         }
@@ -242,14 +277,19 @@ public class CircularView extends View {
 
     /**
      * Set the adapter to use on this view.
+     *
      * @param adapter Adapter to set.
      */
     public void setAdapter(final CircularViewAdapter adapter) {
         mAdapter = adapter;
+        if(mAdapter != null) {
+            mAdapter.registerDataSetObserver(mAdapterDataSetObserver);
+        }
     }
 
     /**
      * Get the adapter that has been set on this view.
+     *
      * @return
      * @see #setAdapter(CircularViewAdapter)
      */
@@ -400,14 +440,14 @@ public class CircularView extends View {
 //        @Override
 //        public void run() {
 //            Log.v(TAG, "running animation: " + mCurrentAnimatingMarker);
-//            if (mMarkerViewList != null && !mMarkerViewList.isEmpty()) {
+//            if (mMarkerList != null && !mMarkerList.isEmpty()) {
 //                Log.v(TAG, "running animation: list is good");
 ////                if (mCurrentAnimatingMarker > 0) {
-////                    mMarkerViewList.get(mCurrentAnimatingMarker - 1).animate(false);
+////                    mMarkerList.get(mCurrentAnimatingMarker - 1).animate(false);
 ////                }
-//                final int size = mMarkerViewList.size();
+//                final int size = mMarkerList.size();
 //                if (mCurrentAnimatingMarker < size) {
-//                    mMarkerViewList.get(mCurrentAnimatingMarker).animate();
+//                    mMarkerList.get(mCurrentAnimatingMarker).animate();
 //                }
 //                mCurrentAnimatingMarker++;
 //                if (mCurrentAnimatingMarker < size) {
@@ -419,6 +459,7 @@ public class CircularView extends View {
 
     /**
      * Get the starting point for the markers.
+     *
      * @return The starting point for the markers.
      */
     public float getMarkerStartingPoint() {
@@ -427,10 +468,19 @@ public class CircularView extends View {
 
     /**
      * Set the starting point for the markers
+     *
      * @param startingPoint Starting point for the markers
      */
     public void setMarkerStartingPoint(final float startingPoint) {
         mMarkerStartingPoint = startingPoint;
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if(mAdapter != null) {
+            mAdapter.unregisterDataSetObserver(mAdapterDataSetObserver);
+        }
     }
 
     class AdapterDataSetObserver extends DataSetObserver {
