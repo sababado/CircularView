@@ -22,12 +22,13 @@ public class MainActivity extends Activity {
 
         circularView = (CircularView) findViewById(R.id.circular_view);
         circularView.setAdapter(mAdapter);
+        circularView.setAnimateMarkerOnHighlight(true);
     }
 
     public class MyCircularViewAdapter extends CircularViewAdapter {
         @Override
         public int getCount() {
-            return 10;
+            return 20;
         }
 
         @Override

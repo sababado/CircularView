@@ -7,65 +7,40 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by rjszabo on 3/21/14.
  */
-public class Marker {
-    private float radius;
+public class Marker extends CircularViewObject {
     private float sectionMin;
     private float sectionMax;
-    private float x;
-    private float y;
-    private Context mContext;
-    private Bitmap bitmap;
-    private CircularView.AdapterDataSetObserver mAdapterDataSetObserver;
 
-    final static int ANIMATION_DURATION = 500;
+    final static int ANIMATION_DURATION = 650;
     private AnimatorSet animatorSet;
 
+    /**
+     * Create a new Marker with the current context.
+     * @param context Current context.
+     */
     public Marker(final Context context) {
-        mContext = context;
+        super(context);
     }
 
     Marker(final Context context, final float x, final float y, final float radius) {
-        this(context);
+        super(context);
         init(x, y, radius, 0, 0, null);
     }
 
-    Marker(final Context context, final float x, final float y, final float radius, final float sectionMin, final float sectionMax) {
-        this(context);
-        init(x, y, radius, sectionMin, sectionMax, null);
-    }
-
     void init(final float x, final float y, final float radius, final float sectionMin, final float sectionMax, final CircularView.AdapterDataSetObserver adapterDataSetObserver) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
+        super.init(x, y, radius, adapterDataSetObserver);
         this.sectionMin = sectionMin;
         this.sectionMax = sectionMax;
-        this.mAdapterDataSetObserver = adapterDataSetObserver;
     }
-
-//    void draw(final Canvas canvas, final float radius, final Paint paint) {
-//
-//        if (bitmap != null) {
-//            canvas.drawBitmap(bitmap,
-//                    x - bitmap.getWidth() / 2f,
-//                    y - bitmap.getHeight() / 2f,
-//                    paint);
-//        }
-////        canvas.drawCircle(x, y, radius, paint);
-//
-////            mTextPaint.setColor(Color.BLACK);
-////            canvas.drawText(String.valueOf(id), x, y, mTextPaint);
-////            mTextPaint.setColor(mExampleColor);
-//    }
-//
-//    void draw(final Canvas canvas, final Paint paint) {
-//        draw(canvas, this.radius, paint);
-//    }
 
     protected void draw(final Canvas canvas) {
         if (bitmap != null) {
@@ -73,69 +48,6 @@ public class Marker {
                     x - bitmap.getWidth() / 2f,
                     y - bitmap.getHeight() / 2f,
                     null);
-        }
-    }
-
-    /**
-     * Get the marker's bitmap.
-     *
-     * @return The marker's bitmap.
-     */
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
-
-    /**
-     * Set the marker's visual as a bitmap.
-     *
-     * @param bitmap Bitmap to display.
-     */
-    public void setSrc(Bitmap bitmap) {
-        this.bitmap = bitmap;
-        if(mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onChanged();
-        }
-    }
-
-    /**
-     * Set the marker's visual by using a resource id.
-     *
-     * @param resId Resource id of the drawable to display.
-     */
-    public void setSrc(final int resId) {
-        setSrc(BitmapFactory.decodeResource(mContext.getResources(), resId));
-    }
-
-    public float getY() {
-        return y;
-    }
-
-    public void setY(float y) {
-        this.y = y;
-        if(mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onChanged();
-        }
-    }
-
-    public float getX() {
-        return x;
-    }
-
-    public void setX(float x) {
-        this.x = x;
-        if(mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onChanged();
-        }
-    }
-
-    public float getRadius() {
-        return radius;
-    }
-
-    public void setRadius(float radius) {
-        this.radius = radius;
-        if(mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onChanged();
         }
     }
 
@@ -150,7 +62,7 @@ public class Marker {
 
     public void animate() {
         final float start = y;
-        final float end = y - 50;
+        final float end = y - 25;
         final ObjectAnimator up = ObjectAnimator.ofFloat(Marker.this, "y", start, end).setDuration(ANIMATION_DURATION);
         final ObjectAnimator down = ObjectAnimator.ofFloat(Marker.this, "y", end, start).setDuration(ANIMATION_DURATION);
         if (animatorSet != null) {
@@ -167,15 +79,36 @@ public class Marker {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        Marker marker = (Marker) o;
+
+        if (Float.compare(marker.sectionMax, sectionMax) != 0) return false;
+        if (Float.compare(marker.sectionMin, sectionMin) != 0) return false;
+        if (animatorSet != null ? !animatorSet.equals(marker.animatorSet) : marker.animatorSet != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (sectionMin != +0.0f ? Float.floatToIntBits(sectionMin) : 0);
+        result = 31 * result + (sectionMax != +0.0f ? Float.floatToIntBits(sectionMax) : 0);
+        result = 31 * result + (animatorSet != null ? animatorSet.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "Marker{" +
-                "radius=" + radius +
-                ", sectionMin=" + sectionMin +
+                "sectionMin=" + sectionMin +
                 ", sectionMax=" + sectionMax +
-                ", x=" + x +
-                ", y=" + y +
-                ", mContext=" + mContext +
-                ", bitmap=" + bitmap +
-                '}';
+                ", animatorSet=" + animatorSet +
+                "} " + super.toString();
     }
 }

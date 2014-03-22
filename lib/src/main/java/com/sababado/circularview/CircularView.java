@@ -1,24 +1,19 @@
 package com.sababado.circularview;
 
 import android.animation.Animator;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.BaseAdapter;
 
 import java.util.ArrayList;
 
@@ -48,10 +43,9 @@ public class CircularView extends View {
     private ArrayList<Marker> mMarkerList;
     private Marker mCircle;
     private float mCircleCenter;
-    private float highlightedDegree;
-    private boolean isAnimating;
-
-    private int mOrientation;
+    private float mHighlightedDegree;
+    private boolean mAnimateMarkerOnHighlight;
+    private boolean mIsAnimating;
 
     private int paddingLeft;
     private int paddingTop;
@@ -118,20 +112,18 @@ public class CircularView extends View {
         mCirclePaint.setStyle(Paint.Style.FILL);
         mCirclePaint.setColor(Color.RED);
 
-        highlightedDegree = Float.MAX_VALUE;
-        isAnimating = false;
+        mHighlightedDegree = 0f;
+        mAnimateMarkerOnHighlight = false;
+        mIsAnimating = false;
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        mOrientation = getResources().getConfiguration().orientation;
-
         // init circle dimens
         final int shortDimension = Math.min(
                 mHeight = getMeasuredHeight(),
                 mWidth = getMeasuredWidth());
-        Log.v(TAG, "shortDimensinon: " + shortDimension);
         final float circleRadius = (shortDimension * CIRCLE_WEIGHT_LONG_ORIENTATION - mMarkerRadius * 4f - CIRCLE_TO_MARKER_PADDING * 2f) / 2f;
         mCircleCenter = shortDimension / 2f;
         mCircle = new Marker(getContext(), mCircleCenter, mCircleCenter, circleRadius);
@@ -191,27 +183,18 @@ public class CircularView extends View {
                 final Marker newMarker = mAdapter.getMarker(position, oldMarker);
                 assert (newMarker != null);
 
-//                final Marker markerView = new Marker(
-//                        getContext(),
-//                        (float) (radiusFromCenter * Math.cos(rad)) + mCircleCenter,
-//                        (float) (radiusFromCenter * Math.sin(rad)) + mCircleCenter,
-//                        mMarkerRadius,
-//                        normalizeDegree(sectionMin),
-//                        normalizeDegree(sectionMin + degreeInterval));
                 newMarker.init(
                         (float) (radiusFromCenter * Math.cos(rad)) + mCircleCenter,
                         (float) (radiusFromCenter * Math.sin(rad)) + mCircleCenter,
                         mMarkerRadius,
                         normalizeDegree(sectionMin),
-                        normalizeDegree(sectionMin + degreeInterval),
+                        normalizeDegree(sectionMin + degreeInterval) - 0.001f,
                         mAdapterDataSetObserver);
-//                markerView.setSrc(R.drawable.ic_launcher);
                 if (isExistingPositionInList) {
                     mMarkerList.set(position, newMarker);
                 } else {
                     mMarkerList.add(newMarker);
                 }
-//                Log.v(TAG, "markerView: " + markerView);
                 position++;
             }
             mMarkerList.trimToSize();
@@ -222,29 +205,30 @@ public class CircularView extends View {
         mTextPaint.setTextSize(mExampleDimension);
         mTextPaint.setColor(mExampleColor);
 //        mTextWidth = mTextPaint.measureText(mText);
-        mTextWidth = mTextPaint.measureText(String.valueOf(highlightedDegree));
+        mTextWidth = mTextPaint.measureText(String.valueOf(mHighlightedDegree));
 
         Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
         mTextHeight = fontMetrics.bottom;
     }
 
+    //TODO always draw the animating markers on top.
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        int contentWidth = getWidth() - paddingLeft - paddingRight;
-        int contentHeight = getHeight() - paddingTop - paddingBottom;
+        int contentWidth = mWidth - paddingLeft - paddingRight;
+        int contentHeight = mHeight - paddingTop - paddingBottom;
 
         mCirclePaint.setStyle(Paint.Style.FILL);
         mCirclePaint.setColor(Color.RED);
-        // Draw Circle
+        // Draw CircularViewObject
         mCircle.draw(canvas);
         // Draw Markers
         if (mMarkerList != null && !mMarkerList.isEmpty()) {
             mCirclePaint.setStyle(Paint.Style.STROKE);
             mCirclePaint.setColor(Color.BLUE);
             for (final Marker marker : mMarkerList) {
-                if (isAnimating && marker.hasInSection(highlightedDegree % 360)) {
+                if ((mIsAnimating || mAnimateMarkerOnHighlight) && marker.hasInSection(mHighlightedDegree % 360)) {
                     if (!marker.isAnimating()) {
                         marker.animate();
                     }
@@ -257,9 +241,18 @@ public class CircularView extends View {
             }
         }
 
+        // Draw line
+        if (mIsAnimating) {
+            final float radiusFromCenter = mCircle.getRadius() + CIRCLE_TO_MARKER_PADDING + mMarkerRadius;
+            final float x = (float) Math.cos(Math.toRadians(mHighlightedDegree)) * radiusFromCenter + mCircleCenter;
+            final float y = (float) Math.sin(Math.toRadians(mHighlightedDegree)) * radiusFromCenter + mCircleCenter;
+            canvas.drawLine(mCircleCenter, mCircleCenter, x, y, mCirclePaint);
+        }
+
+
         // Draw the text.
-        if (isAnimating) {
-            canvas.drawText(String.valueOf(highlightedDegree),
+        if (mIsAnimating) {
+            canvas.drawText(String.valueOf(mHighlightedDegree),
                     mCircle.getX() - mTextWidth / 2f,
                     mCircle.getY() - mTextHeight / 2f,
 //                paddingLeft + (contentWidth - mTextWidth) / 2,
@@ -282,7 +275,7 @@ public class CircularView extends View {
      */
     public void setAdapter(final CircularViewAdapter adapter) {
         mAdapter = adapter;
-        if(mAdapter != null) {
+        if (mAdapter != null) {
             mAdapter.registerDataSetObserver(mAdapterDataSetObserver);
         }
     }
@@ -376,56 +369,76 @@ public class CircularView extends View {
     }
 
     public float getHighlightedDegree() {
-        return highlightedDegree;
+        return mHighlightedDegree;
     }
 
     /**
-     * Set the degree to highlight.
+     * Set the degree that will trigger highlighting a marker.
      *
      * @param highlightedDegree Value in degrees.
      */
-    public void setHighlightedDegree(float highlightedDegree) {
-        this.highlightedDegree = highlightedDegree;
+    public void setHighlightedDegree(final float highlightedDegree) {
+        this.mHighlightedDegree = highlightedDegree;
         invalidateTextPaintAndMeasurements();
         invalidate();
+    }
+
+    /**
+     * Check if a marker should animate when it is highlighted. By default this is false and when it is
+     * set to true the marker will constantly be animating.
+     *
+     * @return True if a marker should animate when it is highlighted, false if not.
+     * @see #setHighlightedDegree(float)
+     */
+    public boolean isAnimateMarkerOnHighlight() {
+        return mAnimateMarkerOnHighlight;
+    }
+
+    /**
+     * If set to true the marker that is highlighted with {@link #setHighlightedDegree(float)} will
+     * animate continuously. This is set to false by default.
+     *
+     * @param animateMarkerOnHighlight True to continuously animate, false to turn it off.
+     */
+    public void setAnimateMarkerOnHighlight(boolean animateMarkerOnHighlight) {
+        this.mAnimateMarkerOnHighlight = animateMarkerOnHighlight;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            startAnimation();
+            animateHighlightedDegree();
         }
         return true;
     }
 
-    private Handler mHandler;
+    public void setOnCenterClickListener(OnClickListener l) {
+        //TODO
+    }
 
-    public void startAnimation() {
-//        if (mHandler == null) {
-//            mHandler = new Handler();
-//        }
-//        mHandler.removeCallbacks(mAnimationRunnable);
-        highlightedDegree = 0;
-//        mHandler.post(mAnimationRunnable);
+    // TODO make variable
+    public void animateHighlightedDegree() {
+        mHighlightedDegree = 90f;
         final float end = 450f + (float) (Math.random() * 720f);
+        // animate the highlighted degree value but also make sure it isn't so fast that it's skipping marker animations.
         final ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(CircularView.this, "highlightedDegree", 90f, end)
-                .setDuration(2160);
+                .setDuration((long) (Marker.ANIMATION_DURATION * 2L * end / 270L));
         objectAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
                 Log.v(TAG, "animation: start");
-                isAnimating = true;
+                mIsAnimating = true;
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
                 Log.v(TAG, "animation: end");
-//                setHighlightedDegree(Float.MIN_VALUE);
+                mIsAnimating = false;
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
-
+                mIsAnimating = false;
             }
 
             @Override
@@ -435,27 +448,6 @@ public class CircularView extends View {
         });
         objectAnimator.start();
     }
-
-//    private Runnable mAnimationRunnable = new Runnable() {
-//        @Override
-//        public void run() {
-//            Log.v(TAG, "running animation: " + mCurrentAnimatingMarker);
-//            if (mMarkerList != null && !mMarkerList.isEmpty()) {
-//                Log.v(TAG, "running animation: list is good");
-////                if (mCurrentAnimatingMarker > 0) {
-////                    mMarkerList.get(mCurrentAnimatingMarker - 1).animate(false);
-////                }
-//                final int size = mMarkerList.size();
-//                if (mCurrentAnimatingMarker < size) {
-//                    mMarkerList.get(mCurrentAnimatingMarker).animate();
-//                }
-//                mCurrentAnimatingMarker++;
-//                if (mCurrentAnimatingMarker < size) {
-//                    mHandler.postDelayed(mAnimationRunnable, 100);
-//                }
-//            }
-//        }
-//    };
 
     /**
      * Get the starting point for the markers.
@@ -478,7 +470,7 @@ public class CircularView extends View {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if(mAdapter != null) {
+        if (mAdapter != null) {
             mAdapter.unregisterDataSetObserver(mAdapterDataSetObserver);
         }
     }

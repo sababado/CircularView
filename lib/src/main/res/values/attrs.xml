@@ -5,7 +5,6 @@
         <attr name="exampleDimension" format="dimension" />
         <attr name="exampleColor" format="color" />
         <attr name="exampleDrawable" format="color|reference" />
-        <attr name="markerCount" format="integer" />
         <attr name="markerStartingPoint" format="enum">
             <enum name="top" value="270" />
             <enum name="bottom" value="90" />
