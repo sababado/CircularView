@@ -43,20 +43,20 @@ public class CircularViewObject {
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(NO_COLOR);
-        radiusPadding = 5f;
+        setRadiusPadding(5f);
         fitToCircle = false;
     }
 
     CircularViewObject(final Context context, final float radiusPadding, final int centerBackgroundColor) {
         this(context);
-        this.radiusPadding = radiusPadding;
+        setRadiusPadding(radiusPadding);
         paint.setColor(centerBackgroundColor);
     }
 
     protected void init(final float x, final float y, final float radius, final CircularView.AdapterDataSetObserver adapterDataSetObserver) {
         this.x = x;
         this.y = y;
-        this.radius = radius;
+        setRadius(radius);
         this.mAdapterDataSetObserver = adapterDataSetObserver;
     }
 
@@ -264,6 +264,9 @@ public class CircularViewObject {
      */
     public void setRadiusPadding(float radiusPadding) {
         this.radiusPadding = radiusPadding;
+        if (mAdapterDataSetObserver != null) {
+            mAdapterDataSetObserver.onChanged();
+        }
     }
 
     /**
