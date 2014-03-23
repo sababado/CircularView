@@ -12,7 +12,7 @@ import android.view.View;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by rjszabo on 3/22/14.
+ * TODO Document
  */
 public class CircularViewObject {
     private static final AtomicInteger sAtomicIdCounter = new AtomicInteger(0);
@@ -51,13 +51,6 @@ public class CircularViewObject {
         this(context);
         this.radiusPadding = radiusPadding;
         paint.setColor(centerBackgroundColor);
-    }
-
-    CircularViewObject(final Context context, final float x, final float y, final float radius, final float radiusPadding, final int centerBackgroundColor) {
-        this(context);
-        this.radiusPadding = radiusPadding;
-        paint.setColor(centerBackgroundColor);
-        init(x, y, radius, null);
     }
 
     protected void init(final float x, final float y, final float radius, final CircularView.AdapterDataSetObserver adapterDataSetObserver) {

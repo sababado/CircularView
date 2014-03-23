@@ -120,7 +120,7 @@ public class CircularView extends View {
         mAnimateMarkerOnHighlight = false;
         mIsAnimating = false;
 
-        mCircle = new CircularViewObject(getContext(),CIRCLE_TO_MARKER_PADDING, centerBackgroundColor);
+        mCircle = new CircularViewObject(getContext(), CIRCLE_TO_MARKER_PADDING, centerBackgroundColor);
         mCircle.setSrc(circleDrawable);
     }
 
@@ -239,16 +239,7 @@ public class CircularView extends View {
             mCirclePaint.setStyle(Paint.Style.STROKE);
             mCirclePaint.setColor(Color.BLUE);
             for (final Marker marker : mMarkerList) {
-                if ((mIsAnimating || mAnimateMarkerOnHighlight) && marker.hasInSection(mHighlightedDegree % 360)) {
-                    if (!marker.isAnimating()) {
-                        marker.animateBounce();
-                    }
-                    mCirclePaint.setStyle(Paint.Style.FILL);
-                    marker.draw(canvas);
-                    mCirclePaint.setStyle(Paint.Style.STROKE);
-                } else {
-                    marker.draw(canvas);
-                }
+                marker.draw(canvas);
             }
         }
 
@@ -345,6 +336,19 @@ public class CircularView extends View {
     public void setHighlightedDegree(final float highlightedDegree) {
         this.mHighlightedDegree = highlightedDegree;
         invalidateTextPaintAndMeasurements();
+
+        if (mMarkerList != null) {
+            for (final Marker marker : mMarkerList) {
+                final boolean markerShouldBeHighlighted = marker.hasInSection(mHighlightedDegree % 360);
+                marker.setHighlighted(markerShouldBeHighlighted);
+                if ((mIsAnimating || mAnimateMarkerOnHighlight)
+                        && markerShouldBeHighlighted
+                        && !marker.isAnimating()) {
+                    marker.animateBounce();
+                }
+            }
+        }
+
         invalidate();
     }
 
@@ -367,10 +371,12 @@ public class CircularView extends View {
      */
     public void setAnimateMarkerOnHighlight(boolean animateMarkerOnHighlight) {
         this.mAnimateMarkerOnHighlight = animateMarkerOnHighlight;
+
     }
 
     /**
      * Get the center circle object.
+     *
      * @return The center circle object.
      */
     public CircularViewObject getCenterCircle() {
@@ -486,6 +492,7 @@ public class CircularView extends View {
         // Remove all callback references from the markers
         if (mMarkerList != null) {
             for (final Marker marker : mMarkerList) {
+                marker.cancelAnimation();
                 marker.setCallback(null);
             }
         }
@@ -513,11 +520,11 @@ public class CircularView extends View {
     /**
      * This method converts device specific pixels to density independent pixels.
      *
-     * @param px A value in px (pixels) unit. Which we need to convert into db
+     * @param px      A value in px (pixels) unit. Which we need to convert into db
      * @param context Context to get resources and device specific display metrics
      * @return A float value to represent dp equivalent to px value
      */
-    public static float convertPixelsToDp(float px, Context context){
+    public static float convertPixelsToDp(float px, Context context) {
         Resources resources = context.getResources();
         DisplayMetrics metrics = resources.getDisplayMetrics();
         float dp = px / (metrics.densityDpi / 160f);

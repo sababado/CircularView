@@ -1,25 +1,29 @@
 package com.sababado.circularview;
 
+import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 
 /**
- * Created by rjszabo on 3/21/14.
+ * TODO Document
  */
 public class Marker extends CircularViewObject {
     private float sectionMin;
     private float sectionMax;
+    private boolean isHighlighted;
 
     public final static int ANIMATION_DURATION = 650;
     private AnimatorSet animatorSet;
 
     /**
      * Create a new Marker with the current context.
+     *
      * @param context Current context.
      */
     public Marker(final Context context) {
         super(context);
+        isHighlighted = false;
     }
 
     void init(final float x, final float y, final float radius, final float sectionMin, final float sectionMax, final CircularView.AdapterDataSetObserver adapterDataSetObserver) {
@@ -41,21 +45,75 @@ public class Marker extends CircularViewObject {
      * Animate a simple up and down motion.
      */
     public void animateBounce() {
+        if (animatorSet != null) {
+            animatorSet.end();
+        } else {
+            animatorSet = createNewBounceAnimation();
+        }
+        animatorSet.start();
+    }
+
+    AnimatorSet createNewBounceAnimation() {
+        final AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if(Marker.this.isHighlighted) {
+                    animatorSet.start();
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+            }
+        });
         final float start = y;
         final float end = y - 25;
         final ObjectAnimator up = ObjectAnimator.ofFloat(Marker.this, "y", start, end).setDuration(ANIMATION_DURATION);
         final ObjectAnimator down = ObjectAnimator.ofFloat(Marker.this, "y", end, start).setDuration(ANIMATION_DURATION);
-        if (animatorSet != null) {
-            animatorSet.end();
-        } else {
-            animatorSet = new AnimatorSet();
-        }
         animatorSet.playSequentially(up, down);
-        animatorSet.start();
+        return animatorSet;
     }
 
     public boolean isAnimating() {
         return animatorSet != null && animatorSet.isRunning();
+    }
+
+    /**
+     * Check if this marker is highlighted.
+     * @return Flag that determines if this marker is highlighted.
+     */
+    public boolean isHighlighted() {
+        return isHighlighted;
+    }
+
+    /**
+     * Set the flag that determines if this marker is highlighted. Setting this to true and then calling
+     * {@link #animateBounce()} will allow the animation to repeat.
+     * Setting this to false while an animation is running will allow it to gracefully end.
+     * @param highlighted True to mark this object as highlighted.
+     */
+    public void setHighlighted(boolean highlighted) {
+        this.isHighlighted = highlighted;
+        mAdapterDataSetObserver.onChanged();
+    }
+
+    /**
+     * Cancel any running animations on this marker.
+     */
+    public void cancelAnimation() {
+        if(animatorSet != null) {
+            this.isHighlighted = false;
+            animatorSet.cancel();
+        }
     }
 
     @Override
