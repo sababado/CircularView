@@ -21,7 +21,7 @@ public class Marker extends CircularViewObject {
      *
      * @param context Current context.
      */
-    public Marker(final Context context) {
+    Marker(final Context context) {
         super(context);
         isHighlighted = false;
     }

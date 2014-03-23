@@ -14,13 +14,12 @@ public abstract class CircularViewAdapter {
     public abstract int getCount();
 
     /**
-     * Get the marker that should show at a given position. The position will be between 0 and the value returned by {@link #getCount()}.
+     * Setup the marker that should show at a given position. The position will be between 0 and the value returned by {@link #getCount()}.
      *
      * @param position  Position of the marker to show.
-     * @param oldMarker The old marker that was used the last time this was called for this position. Use this object if it isn't null to optimize the adapter.
-     * @return A non null marker to show.
+     * @param marker The marker that will be used to display.
      */
-    public abstract Marker getMarker(int position, Marker oldMarker);
+    public abstract void setupMarker(int position, Marker marker);
 
     void registerDataSetObserver(DataSetObserver observer) {
         mDataSetObservable.registerObserver(observer);

@@ -179,16 +179,12 @@ public class CircularView extends View {
                 final float sectionMin = actualDegree - degreeInterval / 2f;
 
                 // get the old marker view if it exists.
-                final Marker oldMarker;
+                final Marker newMarker;
                 if (positionHasExistingMarkerInList) {
-                    oldMarker = mMarkerList.get(position);
+                    newMarker = mMarkerList.get(position);
                 } else {
-                    oldMarker = null;
+                    newMarker = new Marker(getContext());
                 }
-
-                // get the new marker view.
-                final Marker newMarker = mAdapter.getMarker(position, oldMarker);
-                assert (newMarker != null);
 
                 // Initialize all other necessary values
                 newMarker.init(
@@ -200,6 +196,9 @@ public class CircularView extends View {
                         mAdapterDataSetObserver);
                 // Make sure it's drawable has the callback set
                 newMarker.setCallback(this);
+
+                // get the new marker view.
+                mAdapter.setupMarker(position, newMarker);
 
                 // Add to list
                 if (positionHasExistingMarkerInList) {

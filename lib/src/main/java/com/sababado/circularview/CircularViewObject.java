@@ -309,7 +309,9 @@ public class CircularViewObject {
      */
     public void setFitToCircle(boolean fitToCircle) {
         this.fitToCircle = fitToCircle;
-        mAdapterDataSetObserver.onChanged();
+        if(mAdapterDataSetObserver != null) {
+            mAdapterDataSetObserver.onChanged();
+        }
     }
 
     @Override

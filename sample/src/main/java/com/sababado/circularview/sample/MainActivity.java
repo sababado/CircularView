@@ -34,7 +34,7 @@ public class MainActivity extends Activity {
                 // animate the highlighted degree value but also make sure it isn't so fast that it's skipping marker animations.
                 final long duration = (long) (Marker.ANIMATION_DURATION * 2L * end / (270L - mAdapter.getCount()));
 
-                circularView.animateHighlightedDegree(start,end,duration);
+                circularView.animateHighlightedDegree(start, end, duration);
             }
         });
     }
@@ -46,15 +46,10 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public Marker getMarker(final int position, final Marker oldMarkerView) {
-            final Marker markerView;
-            if (oldMarkerView != null) {
-                markerView = oldMarkerView;
-            } else {
-                markerView = new Marker(MainActivity.this);
-                markerView.setSrc(R.drawable.ic_launcher);
-            }
-            return markerView;
+        public void setupMarker(final int position, final Marker marker) {
+            marker.setSrc(R.drawable.ic_launcher);
+            marker.setFitToCircle(true);
+            marker.setRadius(10 + 2 * position);
         }
     }
 }
