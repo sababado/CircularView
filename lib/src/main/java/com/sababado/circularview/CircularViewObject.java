@@ -114,9 +114,28 @@ public class CircularViewObject {
     }
 
     void setCallback(final View view) {
-        if(drawable != null) {
+        if (drawable != null) {
             drawable.setCallback(view);
         }
+    }
+
+    /**
+     * Specify a set of states for the drawable. These are use-case specific, so see the relevant documentation. As an example, the background for widgets like Button understand the following states: [state_focused, state_pressed].<br/>
+     * If the new state you are supplying causes the appearance of the Drawable to change, then it is responsible for calling invalidateSelf() in order to have itself redrawn, and true will be returned from this function.<br/>
+     * Note: The Drawable holds a reference on to stateSet until a new state array is given to it, so you must not modify this array during that time.
+     *
+     * @param stateSet The new set of states to be displayed.
+     * @return Returns true if this change in state has caused the appearance of the Drawable to change (hence requiring an invalidate), otherwise returns false.
+     */
+    public boolean setState(final int[] stateSet) {
+        boolean appearanceChange = false;
+        if (drawable != null) {
+            appearanceChange = drawable.setState(stateSet);
+            if (appearanceChange) {
+                drawable.invalidateSelf();
+            }
+        }
+        return appearanceChange;
     }
 
     /**
@@ -193,6 +212,7 @@ public class CircularViewObject {
 
     /**
      * Get the object's visual padding from the radius.
+     *
      * @return The object's visual padding from the radius.
      */
     public float getRadiusPadding() {
@@ -201,6 +221,7 @@ public class CircularViewObject {
 
     /**
      * Set the object's visual padding from the radius.
+     *
      * @param radiusPadding The object's visual padding from the radius.
      */
     public void setRadiusPadding(float radiusPadding) {

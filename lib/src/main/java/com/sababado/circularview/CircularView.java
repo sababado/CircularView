@@ -11,7 +11,7 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.util.StateSet;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -22,6 +22,8 @@ import java.util.ArrayList;
  */
 public class CircularView extends View {
     private static final String TAG = CircularView.class.getSimpleName();
+    public static final int[] PRESSED_STATE_SET = new int[]{android.R.attr.state_pressed};
+    public static final int[] DE_PRESSED_STATE_SET = new int[]{-android.R.attr.state_pressed};
     private String mText; //TODO add customization for the text (style, color, etc)
     private int mCenterBackgroundColor = 0;
     private float mExampleDimension = 0; // TODO: use a default from R.dimen...
@@ -39,6 +41,7 @@ public class CircularView extends View {
 
     private CircularViewAdapter mAdapter;
     private final AdapterDataSetObserver mAdapterDataSetObserver = new AdapterDataSetObserver();
+    private OnClickListener mOnCenterCircleClickListener;
 
     private ArrayList<Marker> mMarkerList;
     private CircularViewObject mCircle;
@@ -46,6 +49,7 @@ public class CircularView extends View {
     private float mHighlightedDegree;
     private boolean mAnimateMarkerOnHighlight;
     private boolean mIsAnimating;
+    ObjectAnimator mObjectAnimator;
 
     private int paddingLeft;
     private int paddingTop;
@@ -414,34 +418,89 @@ public class CircularView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            animateHighlightedDegree();
+        boolean handled = false;
+        final int action = event.getAction();
+        final boolean isEventInCenterCircle = isInCenterCircle(event.getX(), event.getY());
+        if (action == MotionEvent.ACTION_DOWN) {
+            // check if center
+            if (isEnabled() && isEventInCenterCircle) {
+                setCenterCircleState(PRESSED_STATE_SET);
+                handled = true;
+            }
+        } else if (action == MotionEvent.ACTION_UP) {
+            if (isEventInCenterCircle) {
+                setCenterCircleState(StateSet.NOTHING);
+                if (mOnCenterCircleClickListener != null) {
+                    mOnCenterCircleClickListener.onClick(this);
+                }
+                handled = true;
+            }
+        } else if (action == MotionEvent.ACTION_MOVE) {
+            if (!isEventInCenterCircle) {
+                setCenterCircleState(StateSet.NOTHING);
+                handled = true;
+            }
         }
-        return true;
+        return handled || super.onTouchEvent(event);
     }
 
-    public void setOnCenterClickListener(OnClickListener l) {
-        //TODO
+    void setCenterCircleState(final int[] stateSet) {
+        if (mCircle != null) {
+            mCircle.setState(stateSet);
+        }
     }
 
-    // TODO make variable
-    public void animateHighlightedDegree() {
-        mHighlightedDegree = 90f;
-        final float end = 450f + (float) (Math.random() * 720f);
-        final int markerCount = mMarkerList == null ? 0 : mMarkerList.size();
-        // animate the highlighted degree value but also make sure it isn't so fast that it's skipping marker animations.
-        final ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(CircularView.this, "highlightedDegree", 90f, end)
-                .setDuration((long) (Marker.ANIMATION_DURATION * 2L * end / (270L - markerCount)));
-        objectAnimator.addListener(new Animator.AnimatorListener() {
+    /**
+     * Set the click listener that will receive a callback when the center circle is clicked.
+     *
+     * @param l Listener to receive a callback.
+     */
+    public void setOnCenterCircleClickListener(OnClickListener l) {
+        mOnCenterCircleClickListener = l;
+    }
+
+    /**
+     * Check to see if a point is in the center circle or not.
+     * This simply uses the distance formula to get the distance from the center of the circle
+     * to the given point and then compares that to the circle's radius.
+     *
+     * @param x X coordinate.
+     * @param y Y coordinate.
+     * @return True if the point is within the circle, false if not.
+     */
+    public boolean isInCenterCircle(final float x, final float y) {
+        boolean isInCenter = false;
+        if (mCircle != null) {
+            final double c = Math.sqrt(Math.pow(x - mCircle.getX(), 2) + Math.pow(y - mCircle.getY(), 2));
+            isInCenter = c <= mCircle.getRadius();
+        }
+        return isInCenter;
+    }
+
+    /**
+     * Start animating the highlighted degree. This will cancel any current animations of this type.
+     * Pass <code>true</code> to {@link #setAnimateMarkerOnHighlight(boolean)} in order to see individual
+     * marker animations when the highlighted degree reaches each marker.
+     *
+     * @param startDegree Degree to start the animation at.
+     * @param endDegree   Degree to end the animation at.
+     * @param duration    Duration the animation should be.
+     */
+    public void animateHighlightedDegree(final float startDegree, final float endDegree, final long duration) {
+        mHighlightedDegree = startDegree;
+        if (mObjectAnimator != null) {
+            mObjectAnimator.cancel();
+        }
+        mObjectAnimator = ObjectAnimator.ofFloat(CircularView.this, "highlightedDegree", startDegree, endDegree)
+                .setDuration(duration);
+        mObjectAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
-                Log.v(TAG, "animation: start");
                 mIsAnimating = true;
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                Log.v(TAG, "animation: end");
                 mIsAnimating = false;
             }
 
@@ -452,10 +511,9 @@ public class CircularView extends View {
 
             @Override
             public void onAnimationRepeat(Animator animation) {
-
             }
         });
-        objectAnimator.start();
+        mObjectAnimator.start();
     }
 
     /**

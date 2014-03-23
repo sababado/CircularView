@@ -2,6 +2,7 @@ package com.sababado.circularview.sample;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
 
 import com.sababado.circularview.CircularView;
 import com.sababado.circularview.CircularViewAdapter;
@@ -23,6 +24,19 @@ public class MainActivity extends Activity {
         circularView = (CircularView) findViewById(R.id.circular_view);
         circularView.setAdapter(mAdapter);
         circularView.setAnimateMarkerOnHighlight(true);
+
+        circularView.setOnCenterCircleClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Start animation from the bottom of the circle, going clockwise.
+                final float start = CircularView.BOTTOM;
+                final float end = start + 360f + (float) (Math.random() * 720f);
+                // animate the highlighted degree value but also make sure it isn't so fast that it's skipping marker animations.
+                final long duration = (long) (Marker.ANIMATION_DURATION * 2L * end / (270L - mAdapter.getCount()));
+
+                circularView.animateHighlightedDegree(start,end,duration);
+            }
+        });
     }
 
     public class MyCircularViewAdapter extends CircularViewAdapter {

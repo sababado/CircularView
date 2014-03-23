@@ -19,7 +19,7 @@
         app:exampleDimension="24sp"
         app:centerBackgroundColor="#33b5e5"
         app:text="Hello, MyView"
-        app:centerDrawable="@drawable/ic_launcher"/>
+        app:centerDrawable="@drawable/center_bg"/>
 
 
 </RelativeLayout>

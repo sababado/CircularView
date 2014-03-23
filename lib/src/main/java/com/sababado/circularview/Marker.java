@@ -11,7 +11,7 @@ public class Marker extends CircularViewObject {
     private float sectionMin;
     private float sectionMax;
 
-    final static int ANIMATION_DURATION = 650;
+    public final static int ANIMATION_DURATION = 650;
     private AnimatorSet animatorSet;
 
     /**
