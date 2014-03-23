@@ -3,8 +3,8 @@
     <declare-styleable name="CircularView">
         <attr name="text" format="string" />
         <attr name="exampleDimension" format="dimension" />
-        <attr name="exampleColor" format="color" />
-        <attr name="exampleDrawable" format="color|reference" />
+        <attr name="centerBackgroundColor" format="color" />
+        <attr name="centerDrawable" format="reference" />
         <attr name="markerStartingPoint" format="enum">
             <enum name="top" value="270" />
             <enum name="bottom" value="90" />

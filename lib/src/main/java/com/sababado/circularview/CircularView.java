@@ -23,9 +23,9 @@ import java.util.ArrayList;
 public class CircularView extends View {
     private static final String TAG = CircularView.class.getSimpleName();
     private String mText; //TODO add customization for the text (style, color, etc)
-    private int mExampleColor = Color.RED; // TODO: use a default from R.color...
+    private int mCenterBackgroundColor = 0;
     private float mExampleDimension = 0; // TODO: use a default from R.dimen...
-    private Drawable mExampleDrawable;
+    private Drawable mCircleDrawable;
 
     private TextPaint mTextPaint;
     private float mTextWidth;
@@ -34,14 +34,14 @@ public class CircularView extends View {
     private Paint mCirclePaint;
     private static final float CIRCLE_WEIGHT_LONG_ORIENTATION = 0.8f;
     private static final float CIRCLE_TO_MARKER_PADDING = 20f;
-    private float mMarkerRadius = 15;
+    private float mMarkerRadius = 40;
     private float mMarkerStartingPoint;
 
     private CircularViewAdapter mAdapter;
     private final AdapterDataSetObserver mAdapterDataSetObserver = new AdapterDataSetObserver();
 
     private ArrayList<Marker> mMarkerList;
-    private Marker mCircle;
+    private CircularViewObject mCircle;
     private float mCircleCenter;
     private float mHighlightedDegree;
     private boolean mAnimateMarkerOnHighlight;
@@ -82,19 +82,19 @@ public class CircularView extends View {
 
         mText = a.getString(
                 R.styleable.CircularView_text);
-        mExampleColor = a.getColor(
-                R.styleable.CircularView_exampleColor,
-                mExampleColor);
+        mCenterBackgroundColor = a.getColor(
+                R.styleable.CircularView_centerBackgroundColor,
+                mCenterBackgroundColor);
         // Use getDimensionPixelSize or getDimensionPixelOffset when dealing with
         // values that should fall on pixel boundaries.
         mExampleDimension = a.getDimension(
                 R.styleable.CircularView_exampleDimension,
                 mExampleDimension);
 
-        if (a.hasValue(R.styleable.CircularView_exampleDrawable)) {
-            mExampleDrawable = a.getDrawable(
-                    R.styleable.CircularView_exampleDrawable);
-            mExampleDrawable.setCallback(this);
+        if (a.hasValue(R.styleable.CircularView_centerDrawable)) {
+            mCircleDrawable = a.getDrawable(
+                    R.styleable.CircularView_centerDrawable);
+            mCircleDrawable.setCallback(this);
         }
 
         a.recycle();
@@ -126,7 +126,12 @@ public class CircularView extends View {
                 mWidth = getMeasuredWidth());
         final float circleRadius = (shortDimension * CIRCLE_WEIGHT_LONG_ORIENTATION - mMarkerRadius * 4f - CIRCLE_TO_MARKER_PADDING * 2f) / 2f;
         mCircleCenter = shortDimension / 2f;
-        mCircle = new Marker(getContext(), mCircleCenter, mCircleCenter, circleRadius);
+        mCircle = new CircularViewObject(getContext(),
+                mCircleCenter, mCircleCenter,
+                circleRadius, CIRCLE_TO_MARKER_PADDING,
+                mCenterBackgroundColor);
+        mCircle.setSrc(mCircleDrawable);
+        mCircle.setAdapterDataSetObserver(mAdapterDataSetObserver);
     }
 
     /**
@@ -166,14 +171,14 @@ public class CircularView extends View {
             int position = 0;
             // loop clockwise
             for (float i = 0; i < 360f; i += degreeInterval) {
-                final boolean isExistingPositionInList = position < markerViewListSize;
+                final boolean positionHasExistingMarkerInList = position < markerViewListSize;
                 final float actualDegree = normalizeDegree(i + 90f);
                 final double rad = Math.toRadians(actualDegree);
                 final float sectionMin = actualDegree - degreeInterval / 2f;
 
                 // get the old marker view if it exists.
                 final Marker oldMarker;
-                if (isExistingPositionInList) {
+                if (positionHasExistingMarkerInList) {
                     oldMarker = mMarkerList.get(position);
                 } else {
                     oldMarker = null;
@@ -183,6 +188,7 @@ public class CircularView extends View {
                 final Marker newMarker = mAdapter.getMarker(position, oldMarker);
                 assert (newMarker != null);
 
+                // Initialize all other necessary values
                 newMarker.init(
                         (float) (radiusFromCenter * Math.cos(rad)) + mCircleCenter,
                         (float) (radiusFromCenter * Math.sin(rad)) + mCircleCenter,
@@ -190,7 +196,11 @@ public class CircularView extends View {
                         normalizeDegree(sectionMin),
                         normalizeDegree(sectionMin + degreeInterval) - 0.001f,
                         mAdapterDataSetObserver);
-                if (isExistingPositionInList) {
+                // Make sure it's drawable has the callback set
+                newMarker.setCallback(this);
+
+                // Add to list
+                if (positionHasExistingMarkerInList) {
                     mMarkerList.set(position, newMarker);
                 } else {
                     mMarkerList.add(newMarker);
@@ -203,7 +213,6 @@ public class CircularView extends View {
 
     private void invalidateTextPaintAndMeasurements() {
         mTextPaint.setTextSize(mExampleDimension);
-        mTextPaint.setColor(mExampleColor);
 //        mTextWidth = mTextPaint.measureText(mText);
         mTextWidth = mTextPaint.measureText(String.valueOf(mHighlightedDegree));
 
@@ -223,6 +232,9 @@ public class CircularView extends View {
         mCirclePaint.setColor(Color.RED);
         // Draw CircularViewObject
         mCircle.draw(canvas);
+        if (mCircleDrawable != null) {
+            mCircleDrawable.draw(canvas);
+        }
         // Draw Markers
         if (mMarkerList != null && !mMarkerList.isEmpty()) {
             mCirclePaint.setStyle(Paint.Style.STROKE);
@@ -230,7 +242,7 @@ public class CircularView extends View {
             for (final Marker marker : mMarkerList) {
                 if ((mIsAnimating || mAnimateMarkerOnHighlight) && marker.hasInSection(mHighlightedDegree % 360)) {
                     if (!marker.isAnimating()) {
-                        marker.animate();
+                        marker.animateBounce();
                     }
                     mCirclePaint.setStyle(Paint.Style.FILL);
                     marker.draw(canvas);
@@ -258,13 +270,6 @@ public class CircularView extends View {
 //                paddingLeft + (contentWidth - mTextWidth) / 2,
 //                paddingTop + (contentHeight + mTextHeight) / 2,
                     mTextPaint);
-        }
-
-        // Draw the example drawable on top of the text.
-        if (mExampleDrawable != null) {
-            mExampleDrawable.setBounds(paddingLeft, paddingTop,
-                    paddingLeft + contentWidth, paddingTop + contentHeight);
-            mExampleDrawable.draw(canvas);
         }
     }
 
@@ -310,23 +315,24 @@ public class CircularView extends View {
     }
 
     /**
-     * Gets the example color attribute value.
+     * Gets the center background color attribute value.
      *
-     * @return The example color attribute value.
+     * @return The center background color attribute value.
      */
-    public int getExampleColor() {
-        return mExampleColor;
+    public int getCenterBackgroundColor() {
+        return mCircle == null ? mCenterBackgroundColor : mCircle.getCenterBackgroundColor();
     }
 
     /**
-     * Sets the view's example color attribute value. In the example view, this color
-     * is the font color.
+     * Sets the view's center background color attribute value.
      *
-     * @param exampleColor The example color attribute value to use.
+     * @param centerBackgroundColor The color attribute value to use.
      */
-    public void setExampleColor(int exampleColor) {
-        mExampleColor = exampleColor;
-        invalidateTextPaintAndMeasurements();
+    public void setCenterBackgroundColor(int centerBackgroundColor) {
+        mCenterBackgroundColor = centerBackgroundColor;
+        if (mCircle != null) {
+            mCircle.setCenterBackgroundColor(mCenterBackgroundColor);
+        }
     }
 
     /**
@@ -350,22 +356,24 @@ public class CircularView extends View {
     }
 
     /**
-     * Gets the example drawable attribute value.
+     * Gets the drawable for the center circle.
      *
-     * @return The example drawable attribute value.
+     * @return The center circle drawable.
      */
-    public Drawable getExampleDrawable() {
-        return mExampleDrawable;
+    public Drawable getCenterDrawable() {
+        return mCircle == null ? mCircleDrawable : mCircle.getDrawable();
     }
 
     /**
-     * Sets the view's example drawable attribute value. In the example view, this drawable is
-     * drawn above the text.
+     * Sets the drawable for the center circle.
      *
-     * @param exampleDrawable The example drawable attribute value to use.
+     * @param centerDrawable The example drawable attribute value to use.
      */
-    public void setExampleDrawable(Drawable exampleDrawable) {
-        mExampleDrawable = exampleDrawable;
+    public void setCenterDrawable(final Drawable centerDrawable) {
+        mCircleDrawable = centerDrawable;
+        if (mCircle != null) {
+            mCircle.setSrc(centerDrawable);
+        }
     }
 
     public float getHighlightedDegree() {
@@ -420,9 +428,10 @@ public class CircularView extends View {
     public void animateHighlightedDegree() {
         mHighlightedDegree = 90f;
         final float end = 450f + (float) (Math.random() * 720f);
+        final int markerCount = mMarkerList == null ? 0 : mMarkerList.size();
         // animate the highlighted degree value but also make sure it isn't so fast that it's skipping marker animations.
         final ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(CircularView.this, "highlightedDegree", 90f, end)
-                .setDuration((long) (Marker.ANIMATION_DURATION * 2L * end / 270L));
+                .setDuration((long) (Marker.ANIMATION_DURATION * 2L * end / (270L - markerCount)));
         objectAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -470,6 +479,15 @@ public class CircularView extends View {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        // Remove all callback references from the center circle
+        mCircle.setCallback(null);
+        // Remove all callback references from the markers
+        if (mMarkerList != null) {
+            for (final Marker marker : mMarkerList) {
+                marker.setCallback(null);
+            }
+        }
+        // Unregister adapter observer
         if (mAdapter != null) {
             mAdapter.unregisterDataSetObserver(mAdapterDataSetObserver);
         }

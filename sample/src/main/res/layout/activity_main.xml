@@ -17,9 +17,9 @@
         android:paddingLeft="20dp"
         android:paddingBottom="40dp"
         app:exampleDimension="24sp"
-        app:exampleColor="#33b5e5"
+        app:centerBackgroundColor="#33b5e5"
         app:text="Hello, MyView"
-        />
+        app:centerDrawable="@drawable/ic_launcher"/>
 
 
 </RelativeLayout>
