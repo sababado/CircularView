@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.View;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,6 +25,7 @@ public class CircularViewObject {
     protected Context context;
     protected Drawable drawable;
     protected CircularView.AdapterDataSetObserver mAdapterDataSetObserver;
+    private boolean fitToCircle;
 
     /**
      * Use this value to make sure that no color shows.
@@ -38,10 +40,17 @@ public class CircularViewObject {
     public CircularViewObject(final Context context) {
         this.context = context;
         id = sAtomicIdCounter.getAndAdd(1);
-        paint = new Paint();
+        paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(NO_COLOR);
         radiusPadding = 5f;
+        fitToCircle = false;
+    }
+
+    CircularViewObject(final Context context, final float radiusPadding, final int centerBackgroundColor) {
+        this(context);
+        this.radiusPadding = radiusPadding;
+        paint.setColor(centerBackgroundColor);
     }
 
     CircularViewObject(final Context context, final float x, final float y, final float radius, final float radiusPadding, final int centerBackgroundColor) {
@@ -63,14 +72,50 @@ public class CircularViewObject {
             canvas.drawCircle(x, y, radius, paint);
         }
         if (drawable != null) {
+            float leftOffset = -radius + radiusPadding;
+            float topOffset = -radius + radiusPadding;
+            float rightOffset = radius - radiusPadding;
+            float bottomOffset = radius - radiusPadding;
+            if (fitToCircle) {
+                final double extraOffset = distanceFromCenter(x+leftOffset, y+topOffset) - radius;
+                leftOffset += extraOffset;
+                topOffset += extraOffset;
+                rightOffset -= extraOffset;
+                bottomOffset -= extraOffset;
+            }
             drawable.setBounds(
-                    (int) (x - radius + radiusPadding),
-                    (int) (y - radius + radiusPadding),
-                    (int) (x + radius - radiusPadding),
-                    (int) (y + radius - radiusPadding)
+                    (int) (x + leftOffset),
+                    (int) (y + topOffset),
+                    (int) (x + rightOffset),
+                    (int) (y + bottomOffset)
             );
             drawable.draw(canvas);
         }
+    }
+
+    /**
+     * Check to see if a point is in the center circle or not.
+     * This simply uses the distance formula to get the distance from the center of the circle
+     * to the given point and then compares that to the circle's radius.
+     *
+     * @param x X coordinate.
+     * @param y Y coordinate.
+     * @return True if the point is within the circle, false if not.
+     */
+    public boolean isInCenterCircle(final float x, final float y) {
+        final double c = distanceFromCenter(x, y);
+        return c <= radius;
+    }
+
+    /**
+     * Get the distance from the given point to the center of this object.
+     *
+     * @param x X coordinate.
+     * @param y Y coordinate.
+     * @return Distance from the given point to the center of this object.
+     */
+    public double distanceFromCenter(final float x, final float y) {
+        return Math.sqrt(Math.pow(x - this.x, 2) + Math.pow(y - this.y, 2));
     }
 
     /**
@@ -255,6 +300,23 @@ public class CircularViewObject {
 
     void setAdapterDataSetObserver(CircularView.AdapterDataSetObserver adapterDataSetObserver) {
         this.mAdapterDataSetObserver = adapterDataSetObserver;
+    }
+
+    /**
+     * True if the object's drawable should fit inside the center circle. False if it will not.
+     * @return True if the object's drawable should fit inside the center circle. False if it will not.
+     */
+    public boolean isFitToCircle() {
+        return fitToCircle;
+    }
+
+    /**
+     * Set to true if this object's drawable should fit inside of the center circle and false if not.
+     * @param fitToCircle Flag to determine if this drawable should fit inside the center circle.
+     */
+    public void setFitToCircle(boolean fitToCircle) {
+        this.fitToCircle = fitToCircle;
+        mAdapterDataSetObserver.onChanged();
     }
 
     @Override

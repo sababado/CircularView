@@ -23,7 +23,7 @@ public class MainActivity extends Activity {
 
         circularView = (CircularView) findViewById(R.id.circular_view);
         circularView.setAdapter(mAdapter);
-        circularView.setAnimateMarkerOnHighlight(true);
+//        circularView.setAnimateMarkerOnHighlight(true);
 
         circularView.setOnCenterCircleClickListener(new View.OnClickListener() {
             @Override

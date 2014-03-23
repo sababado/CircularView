@@ -3,6 +3,7 @@ package com.sababado.circularview;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Canvas;
@@ -11,6 +12,7 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.StateSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,9 +27,7 @@ public class CircularView extends View {
     public static final int[] PRESSED_STATE_SET = new int[]{android.R.attr.state_pressed};
     public static final int[] DE_PRESSED_STATE_SET = new int[]{-android.R.attr.state_pressed};
     private String mText; //TODO add customization for the text (style, color, etc)
-    private int mCenterBackgroundColor = 0;
     private float mExampleDimension = 0; // TODO: use a default from R.dimen...
-    private Drawable mCircleDrawable;
 
     private TextPaint mTextPaint;
     private float mTextWidth;
@@ -45,7 +45,6 @@ public class CircularView extends View {
 
     private ArrayList<Marker> mMarkerList;
     private CircularViewObject mCircle;
-    private float mCircleCenter;
     private float mHighlightedDegree;
     private boolean mAnimateMarkerOnHighlight;
     private boolean mIsAnimating;
@@ -86,19 +85,20 @@ public class CircularView extends View {
 
         mText = a.getString(
                 R.styleable.CircularView_text);
-        mCenterBackgroundColor = a.getColor(
+        final int centerBackgroundColor = a.getColor(
                 R.styleable.CircularView_centerBackgroundColor,
-                mCenterBackgroundColor);
+                CircularViewObject.NO_COLOR);
         // Use getDimensionPixelSize or getDimensionPixelOffset when dealing with
         // values that should fall on pixel boundaries.
         mExampleDimension = a.getDimension(
                 R.styleable.CircularView_exampleDimension,
                 mExampleDimension);
 
+        Drawable circleDrawable = null;
         if (a.hasValue(R.styleable.CircularView_centerDrawable)) {
-            mCircleDrawable = a.getDrawable(
+            circleDrawable = a.getDrawable(
                     R.styleable.CircularView_centerDrawable);
-            mCircleDrawable.setCallback(this);
+            circleDrawable.setCallback(this);
         }
 
         a.recycle();
@@ -119,6 +119,9 @@ public class CircularView extends View {
         mHighlightedDegree = 0f;
         mAnimateMarkerOnHighlight = false;
         mIsAnimating = false;
+
+        mCircle = new CircularViewObject(getContext(),CIRCLE_TO_MARKER_PADDING, centerBackgroundColor);
+        mCircle.setSrc(circleDrawable);
     }
 
     @Override
@@ -129,13 +132,8 @@ public class CircularView extends View {
                 mHeight = getMeasuredHeight(),
                 mWidth = getMeasuredWidth());
         final float circleRadius = (shortDimension * CIRCLE_WEIGHT_LONG_ORIENTATION - mMarkerRadius * 4f - CIRCLE_TO_MARKER_PADDING * 2f) / 2f;
-        mCircleCenter = shortDimension / 2f;
-        mCircle = new CircularViewObject(getContext(),
-                mCircleCenter, mCircleCenter,
-                circleRadius, CIRCLE_TO_MARKER_PADDING,
-                mCenterBackgroundColor);
-        mCircle.setSrc(mCircleDrawable);
-        mCircle.setAdapterDataSetObserver(mAdapterDataSetObserver);
+        final float circleCenter = shortDimension / 2f;
+        mCircle.init(circleCenter, circleCenter, circleRadius, mAdapterDataSetObserver);
     }
 
     /**
@@ -194,8 +192,8 @@ public class CircularView extends View {
 
                 // Initialize all other necessary values
                 newMarker.init(
-                        (float) (radiusFromCenter * Math.cos(rad)) + mCircleCenter,
-                        (float) (radiusFromCenter * Math.sin(rad)) + mCircleCenter,
+                        (float) (radiusFromCenter * Math.cos(rad)) + mCircle.getX(),
+                        (float) (radiusFromCenter * Math.sin(rad)) + mCircle.getY(),
                         mMarkerRadius,
                         normalizeDegree(sectionMin),
                         normalizeDegree(sectionMin + degreeInterval) - 0.001f,
@@ -236,9 +234,6 @@ public class CircularView extends View {
         mCirclePaint.setColor(Color.RED);
         // Draw CircularViewObject
         mCircle.draw(canvas);
-        if (mCircleDrawable != null) {
-            mCircleDrawable.draw(canvas);
-        }
         // Draw Markers
         if (mMarkerList != null && !mMarkerList.isEmpty()) {
             mCirclePaint.setStyle(Paint.Style.STROKE);
@@ -260,9 +255,9 @@ public class CircularView extends View {
         // Draw line
         if (mIsAnimating) {
             final float radiusFromCenter = mCircle.getRadius() + CIRCLE_TO_MARKER_PADDING + mMarkerRadius;
-            final float x = (float) Math.cos(Math.toRadians(mHighlightedDegree)) * radiusFromCenter + mCircleCenter;
-            final float y = (float) Math.sin(Math.toRadians(mHighlightedDegree)) * radiusFromCenter + mCircleCenter;
-            canvas.drawLine(mCircleCenter, mCircleCenter, x, y, mCirclePaint);
+            final float x = (float) Math.cos(Math.toRadians(mHighlightedDegree)) * radiusFromCenter + mCircle.getX();
+            final float y = (float) Math.sin(Math.toRadians(mHighlightedDegree)) * radiusFromCenter + mCircle.getY();
+            canvas.drawLine(mCircle.getX(), mCircle.getY(), x, y, mCirclePaint);
         }
 
 
@@ -319,27 +314,6 @@ public class CircularView extends View {
     }
 
     /**
-     * Gets the center background color attribute value.
-     *
-     * @return The center background color attribute value.
-     */
-    public int getCenterBackgroundColor() {
-        return mCircle == null ? mCenterBackgroundColor : mCircle.getCenterBackgroundColor();
-    }
-
-    /**
-     * Sets the view's center background color attribute value.
-     *
-     * @param centerBackgroundColor The color attribute value to use.
-     */
-    public void setCenterBackgroundColor(int centerBackgroundColor) {
-        mCenterBackgroundColor = centerBackgroundColor;
-        if (mCircle != null) {
-            mCircle.setCenterBackgroundColor(mCenterBackgroundColor);
-        }
-    }
-
-    /**
      * Gets the example dimension attribute value.
      *
      * @return The example dimension attribute value.
@@ -357,27 +331,6 @@ public class CircularView extends View {
     public void setExampleDimension(float exampleDimension) {
         mExampleDimension = exampleDimension;
         invalidateTextPaintAndMeasurements();
-    }
-
-    /**
-     * Gets the drawable for the center circle.
-     *
-     * @return The center circle drawable.
-     */
-    public Drawable getCenterDrawable() {
-        return mCircle == null ? mCircleDrawable : mCircle.getDrawable();
-    }
-
-    /**
-     * Sets the drawable for the center circle.
-     *
-     * @param centerDrawable The example drawable attribute value to use.
-     */
-    public void setCenterDrawable(final Drawable centerDrawable) {
-        mCircleDrawable = centerDrawable;
-        if (mCircle != null) {
-            mCircle.setSrc(centerDrawable);
-        }
     }
 
     public float getHighlightedDegree() {
@@ -416,11 +369,20 @@ public class CircularView extends View {
         this.mAnimateMarkerOnHighlight = animateMarkerOnHighlight;
     }
 
+    /**
+     * Get the center circle object.
+     * @return The center circle object.
+     */
+    public CircularViewObject getCenterCircle() {
+        return mCircle;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean handled = false;
         final int action = event.getAction();
-        final boolean isEventInCenterCircle = isInCenterCircle(event.getX(), event.getY());
+        final boolean isEventInCenterCircle =
+                mCircle == null ? false : mCircle.isInCenterCircle(event.getX(), event.getY());
         if (action == MotionEvent.ACTION_DOWN) {
             // check if center
             if (isEnabled() && isEventInCenterCircle) {
@@ -457,24 +419,6 @@ public class CircularView extends View {
      */
     public void setOnCenterCircleClickListener(OnClickListener l) {
         mOnCenterCircleClickListener = l;
-    }
-
-    /**
-     * Check to see if a point is in the center circle or not.
-     * This simply uses the distance formula to get the distance from the center of the circle
-     * to the given point and then compares that to the circle's radius.
-     *
-     * @param x X coordinate.
-     * @param y Y coordinate.
-     * @return True if the point is within the circle, false if not.
-     */
-    public boolean isInCenterCircle(final float x, final float y) {
-        boolean isInCenter = false;
-        if (mCircle != null) {
-            final double c = Math.sqrt(Math.pow(x - mCircle.getX(), 2) + Math.pow(y - mCircle.getY(), 2));
-            isInCenter = c <= mCircle.getRadius();
-        }
-        return isInCenter;
     }
 
     /**
@@ -565,4 +509,19 @@ public class CircularView extends View {
             onChanged();
         }
     }
+
+    /**
+     * This method converts device specific pixels to density independent pixels.
+     *
+     * @param px A value in px (pixels) unit. Which we need to convert into db
+     * @param context Context to get resources and device specific display metrics
+     * @return A float value to represent dp equivalent to px value
+     */
+    public static float convertPixelsToDp(float px, Context context){
+        Resources resources = context.getResources();
+        DisplayMetrics metrics = resources.getDisplayMetrics();
+        float dp = px / (metrics.densityDpi / 160f);
+        return dp;
+    }
+
 }

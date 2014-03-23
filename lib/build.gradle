@@ -7,8 +7,8 @@ android {
     defaultConfig {
         minSdkVersion project.ext['minSdkVersion']
         targetSdkVersion project.ext['targetSdkVersion']
-        versionCode 900
-        versionName "0.9.0"
+        versionCode 901
+        versionName "0.9.1"
     }
 
     compileOptions {
