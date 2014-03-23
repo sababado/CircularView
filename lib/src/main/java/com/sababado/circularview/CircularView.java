@@ -39,7 +39,7 @@ public class CircularView extends View {
     private float mMarkerRadius = 40;
     private float mMarkerStartingPoint;
 
-    private CircularViewAdapter mAdapter;
+    private BaseCircularViewAdapter mAdapter;
     private final AdapterDataSetObserver mAdapterDataSetObserver = new AdapterDataSetObserver();
     private OnClickListener mOnCenterCircleClickListener;
 
@@ -267,7 +267,7 @@ public class CircularView extends View {
      *
      * @param adapter Adapter to set.
      */
-    public void setAdapter(final CircularViewAdapter adapter) {
+    public void setAdapter(final BaseCircularViewAdapter adapter) {
         mAdapter = adapter;
         if (mAdapter != null) {
             mAdapter.registerDataSetObserver(mAdapterDataSetObserver);
@@ -278,9 +278,9 @@ public class CircularView extends View {
      * Get the adapter that has been set on this view.
      *
      * @return
-     * @see #setAdapter(CircularViewAdapter)
+     * @see #setAdapter(BaseCircularViewAdapter)
      */
-    public CircularViewAdapter getAdapter() {
+    public BaseCircularViewAdapter getAdapter() {
         return mAdapter;
     }
 

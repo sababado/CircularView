@@ -5,21 +5,21 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.sababado.circularview.CircularView;
-import com.sababado.circularview.CircularViewAdapter;
+import com.sababado.circularview.SimpleCircularViewAdapter;
 import com.sababado.circularview.Marker;
 
 
 public class MainActivity extends Activity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private CircularViewAdapter mAdapter;
+    private SimpleCircularViewAdapter mAdapter;
     private CircularView circularView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mAdapter = new MyCircularViewAdapter();
+        mAdapter = new MySimpleCircularViewAdapter();
 
         circularView = (CircularView) findViewById(R.id.circular_view);
         circularView.setAdapter(mAdapter);
@@ -39,7 +39,7 @@ public class MainActivity extends Activity {
         });
     }
 
-    public class MyCircularViewAdapter extends CircularViewAdapter {
+    public class MySimpleCircularViewAdapter extends SimpleCircularViewAdapter {
         @Override
         public int getCount() {
             return 20;
