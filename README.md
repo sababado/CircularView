@@ -76,6 +76,23 @@ There are a few simple animations built into the library at the moment.
 The `CircularView` has `animateHighlightedDegree(start, end, duration)`. The method takes a start and end position in degrees, and a long value for the duration of the animation.
 The highlighted degree refers to which degree is "highlighted" or "focused". When a degree is focused it can trigger a secondary animation automatically for a `Marker`.
 
+####Marker Animation Options
+`Marker`s have a simple animation associated with them; up and down. It can repeat or it can happen once.
+The `CircularView` can trigger the bounce animation when `animateHighlightedDegree(start, end, duration)` is called. The bounce animation can be turned off by calling the same method with an additional flag.
+For example:
+```JAVA
+`animateHighlightedDegree(start, end, duration, shouldAnimateMarkers)`
+```
+
+In addition there is control over if a marker should bounce while it is highlighted and while the highlighted degree value is constant (aka not animating).
+```JAVA
+// Allow markers to continuously animate on their own when the highlight animation isn't running.
+circularView.setAnimateMarkerOnStillHighlight(true);
+// Combine the above line with the following so that the marker at it's position will animate at the start.
+circularView.setHighlightedDegree(circularView.BOTTOM);
+```
+
+The latter line is necessary in case the bounce animation should also run initially. The highlighted degree is set to `CircularView.HIGHLIGHT_NONE` by default.
 
 ##Customization
 
