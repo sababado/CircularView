@@ -46,9 +46,14 @@ public class CircularView extends View {
     private ArrayList<Marker> mMarkerList;
     private CircularViewObject mCircle;
     private float mHighlightedDegree;
-    private boolean mAnimateMarkerOnHighlight;
+    /**
+     * Use this to specify that no degree should be highlighted.
+     */
+    public static final float HIGHLIGHT_NONE = Float.MIN_VALUE;
+    private boolean mAnimateMarkersOnStillHighlight;
+    private boolean mAnimateMarkersOnHighlightAnimation;
     private boolean mIsAnimating;
-    ObjectAnimator mObjectAnimator;
+    ObjectAnimator mHighlightedDegreeObjectAnimator;
 
     private int paddingLeft;
     private int paddingTop;
@@ -103,6 +108,11 @@ public class CircularView extends View {
 
         a.recycle();
 
+        mHighlightedDegreeObjectAnimator = new ObjectAnimator();
+        mHighlightedDegreeObjectAnimator.setTarget(CircularView.this);
+        mHighlightedDegreeObjectAnimator.setPropertyName("highlightedDegree");
+        mHighlightedDegreeObjectAnimator.addListener(mAnimatorListener);
+
         // Set up a default TextPaint object
         mTextPaint = new TextPaint();
         mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -116,8 +126,9 @@ public class CircularView extends View {
         mCirclePaint.setStyle(Paint.Style.FILL);
         mCirclePaint.setColor(Color.RED);
 
-        mHighlightedDegree = 0f;
-        mAnimateMarkerOnHighlight = false;
+        mHighlightedDegree = HIGHLIGHT_NONE;
+        mAnimateMarkersOnStillHighlight = false;
+        mAnimateMarkersOnHighlightAnimation = false;
         mIsAnimating = false;
 
         mCircle = new CircularViewObject(getContext(), CIRCLE_TO_MARKER_PADDING, centerBackgroundColor);
@@ -184,6 +195,7 @@ public class CircularView extends View {
                     newMarker = mMarkerList.get(position);
                 } else {
                     newMarker = new Marker(getContext());
+                    mMarkerList.add(newMarker);
                 }
 
                 // Initialize all other necessary values
@@ -194,21 +206,20 @@ public class CircularView extends View {
                         normalizeDegree(sectionMin),
                         normalizeDegree(sectionMin + degreeInterval) - 0.001f,
                         mAdapterDataSetObserver);
+                newMarker.setShouldAnimateWhenHighlighted(mAnimateMarkersOnStillHighlight);
                 // Make sure it's drawable has the callback set
                 newMarker.setCallback(this);
 
                 // get the new marker view.
                 mAdapter.setupMarker(position, newMarker);
 
-                // Add to list
-                if (positionHasExistingMarkerInList) {
-                    mMarkerList.set(position, newMarker);
-                } else {
-                    mMarkerList.add(newMarker);
-                }
                 position++;
             }
             mMarkerList.trimToSize();
+            if (mHighlightedDegree != HIGHLIGHT_NONE) {
+                // Force any effect of highlighting.
+                setHighlightedDegree(mHighlightedDegree);
+            }
         }
     }
 
@@ -272,6 +283,7 @@ public class CircularView extends View {
         if (mAdapter != null) {
             mAdapter.registerDataSetObserver(mAdapterDataSetObserver);
         }
+        invalidate();
     }
 
     /**
@@ -328,7 +340,7 @@ public class CircularView extends View {
     }
 
     /**
-     * Set the degree that will trigger highlighting a marker.
+     * Set the degree that will trigger highlighting a marker. You can also set {@link #HIGHLIGHT_NONE} to not highlight any degree.
      *
      * @param highlightedDegree Value in degrees.
      */
@@ -338,10 +350,13 @@ public class CircularView extends View {
 
         if (mMarkerList != null) {
             for (final Marker marker : mMarkerList) {
-                final boolean markerShouldBeHighlighted = marker.hasInSection(mHighlightedDegree % 360);
-                marker.setHighlighted(markerShouldBeHighlighted);
-                if ((mIsAnimating || mAnimateMarkerOnHighlight)
-                        && markerShouldBeHighlighted
+                final boolean markerIsHighlighted = mHighlightedDegree != HIGHLIGHT_NONE && marker.hasInSection(mHighlightedDegree % 360);
+                marker.setHighlighted(markerIsHighlighted);
+                final boolean highlightAnimationAndAnimateMarker = mIsAnimating && mAnimateMarkersOnHighlightAnimation;
+                final boolean stillAndAnimateMarker = !mIsAnimating && mAnimateMarkersOnStillHighlight;
+                final boolean wantsToAnimateMarker = highlightAnimationAndAnimateMarker || stillAndAnimateMarker;
+                if (wantsToAnimateMarker
+                        && markerIsHighlighted
                         && !marker.isAnimating()) {
                     marker.animateBounce();
                 }
@@ -358,19 +373,24 @@ public class CircularView extends View {
      * @return True if a marker should animate when it is highlighted, false if not.
      * @see #setHighlightedDegree(float)
      */
-    public boolean isAnimateMarkerOnHighlight() {
-        return mAnimateMarkerOnHighlight;
+    public boolean isAnimateMarkerOnStillHighlight() {
+        return mAnimateMarkersOnStillHighlight;
     }
 
     /**
      * If set to true the marker that is highlighted with {@link #setHighlightedDegree(float)} will
-     * animate continuously. This is set to false by default.
+     * animate continuously when the highlight degree is not animating. This is set to false by default.
      *
      * @param animateMarkerOnHighlight True to continuously animate, false to turn it off.
      */
-    public void setAnimateMarkerOnHighlight(boolean animateMarkerOnHighlight) {
-        this.mAnimateMarkerOnHighlight = animateMarkerOnHighlight;
-
+    public void setAnimateMarkerOnStillHighlight(boolean animateMarkerOnHighlight) {
+        this.mAnimateMarkersOnStillHighlight = animateMarkerOnHighlight;
+        if (mMarkerList != null) {
+            for (final Marker marker : mMarkerList) {
+                marker.setShouldAnimateWhenHighlighted(animateMarkerOnHighlight);
+            }
+        }
+        invalidate();
     }
 
     /**
@@ -386,11 +406,13 @@ public class CircularView extends View {
     public boolean onTouchEvent(MotionEvent event) {
         boolean handled = false;
         final int action = event.getAction();
+
+        //TODO There is a bug where the state doesn't seem to change on the first click (down/move/up)
         final boolean isEventInCenterCircle =
                 mCircle == null ? false : mCircle.isInCenterCircle(event.getX(), event.getY());
         if (action == MotionEvent.ACTION_DOWN) {
             // check if center
-            if (isEnabled() && isEventInCenterCircle) {
+            if (isEventInCenterCircle) {
                 setCenterCircleState(PRESSED_STATE_SET);
                 handled = true;
             }
@@ -428,7 +450,7 @@ public class CircularView extends View {
 
     /**
      * Start animating the highlighted degree. This will cancel any current animations of this type.
-     * Pass <code>true</code> to {@link #setAnimateMarkerOnHighlight(boolean)} in order to see individual
+     * Pass <code>true</code> to {@link #setAnimateMarkerOnStillHighlight(boolean)} in order to see individual
      * marker animations when the highlighted degree reaches each marker.
      *
      * @param startDegree Degree to start the animation at.
@@ -436,34 +458,53 @@ public class CircularView extends View {
      * @param duration    Duration the animation should be.
      */
     public void animateHighlightedDegree(final float startDegree, final float endDegree, final long duration) {
-        mHighlightedDegree = startDegree;
-        if (mObjectAnimator != null) {
-            mObjectAnimator.cancel();
-        }
-        mObjectAnimator = ObjectAnimator.ofFloat(CircularView.this, "highlightedDegree", startDegree, endDegree)
-                .setDuration(duration);
-        mObjectAnimator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                mIsAnimating = true;
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mIsAnimating = false;
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                mIsAnimating = false;
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-            }
-        });
-        mObjectAnimator.start();
+        animateHighlightedDegree(startDegree, endDegree, duration, true);
     }
+
+    /**
+     * Start animating the highlighted degree. This will cancel any current animations of this type.
+     * Pass <code>true</code> to {@link #setAnimateMarkerOnStillHighlight(boolean)} in order to see individual
+     * marker animations when the highlighted degree reaches each marker.
+     *
+     * @param startDegree    Degree to start the animation at.
+     * @param endDegree      Degree to end the animation at.
+     * @param duration       Duration the animation should be.
+     * @param animateMarkers True to animate markers during the animation. False to not animate the markers.
+     */
+    public void animateHighlightedDegree(final float startDegree, final float endDegree, final long duration, final boolean animateMarkers) {
+        mHighlightedDegreeObjectAnimator.cancel();
+        mHighlightedDegreeObjectAnimator.setFloatValues(startDegree, endDegree);
+        mHighlightedDegreeObjectAnimator.setDuration(duration);
+        mAnimateMarkersOnHighlightAnimation = animateMarkers;
+        mIsAnimating = true;
+        mHighlightedDegreeObjectAnimator.start();
+    }
+
+    private boolean mAnimationWasCanceled = false;
+    private Animator.AnimatorListener mAnimatorListener = new Animator.AnimatorListener() {
+        @Override
+        public void onAnimationStart(Animator animation) {
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            mAnimateMarkersOnHighlightAnimation = mIsAnimating = false;
+            if(!mAnimationWasCanceled) {
+                setHighlightedDegree(getHighlightedDegree());
+            } else {
+                mAnimationWasCanceled = false;
+            }
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            mAnimationWasCanceled = true;
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+        }
+    };
 
     /**
      * Get the starting point for the markers.

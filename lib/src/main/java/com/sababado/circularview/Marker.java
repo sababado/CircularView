@@ -12,6 +12,7 @@ public class Marker extends CircularViewObject {
     private float sectionMin;
     private float sectionMax;
     private boolean isHighlighted;
+    private boolean shouldAnimateWhenHighlighted;
 
     public final static int ANIMATION_DURATION = 650;
     private AnimatorSet animatorSet;
@@ -24,6 +25,7 @@ public class Marker extends CircularViewObject {
     Marker(final Context context) {
         super(context);
         isHighlighted = false;
+        shouldAnimateWhenHighlighted = false;
     }
 
     void init(final float x, final float y, final float radius, final float sectionMin, final float sectionMax, final CircularView.AdapterDataSetObserver adapterDataSetObserver) {
@@ -62,7 +64,7 @@ public class Marker extends CircularViewObject {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                if(Marker.this.isHighlighted) {
+                if(Marker.this.isHighlighted && shouldAnimateWhenHighlighted) {
                     animatorSet.start();
                 }
             }
@@ -103,6 +105,15 @@ public class Marker extends CircularViewObject {
      */
     public void setHighlighted(boolean highlighted) {
         this.isHighlighted = highlighted;
+        mAdapterDataSetObserver.onChanged();
+    }
+
+    boolean isShouldAnimateWhenHighlighted() {
+        return shouldAnimateWhenHighlighted;
+    }
+
+    void setShouldAnimateWhenHighlighted(boolean shouldAnimateWhenHighlighted) {
+        this.shouldAnimateWhenHighlighted = shouldAnimateWhenHighlighted;
         mAdapterDataSetObserver.onChanged();
     }
 

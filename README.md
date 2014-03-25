@@ -10,7 +10,7 @@ A custom view for Android. It consists of a larger center circle that it surroun
 The `CircularView` can be definied in a XML layout or in code. 
 
 ##Quick Setup
-###1. Adding the view to a layout
+###Adding the view to a layout
 ```XML
 <com.sababado.circularview.CircularView
     android:id="@+id/circular_view"
@@ -25,4 +25,60 @@ Using the custom attributes requires the following in the layout file. [Example]
 xmlns:app="http://schemas.android.com/apk/res-auto"
 ```
 
+###Adding `Marker`s
+A `Marker` is an object that visual "floats" around the view. Each marker is can represent data or it can simply be for visual effect. Markers must be customized through a `CircularViewAdapter`.
+```JAVA
+public class MySimpleCircularViewAdapter extends SimpleCircularViewAdapter {
+    @Override
+    public int getCount() {
+        // This count will tell the circular view how many markers to use.
+        return 20;
+    }
+
+    @Override
+    public void setupMarker(final int position, final Marker marker) {
+        // Setup and customize markers here. This is called everytime a marker is to be displayed.
+        // 0 >= position > getCount()
+        // The marker is intended to be reused. It will never be null.
+        marker.setSrc(R.drawable.ic_launcher);
+        marker.setFitToCircle(true);
+        marker.setRadius(10 + 2 * position);
+    }
+}
+```
+
+Once the `CircularViewAdapter` implementation is ready it can be set on a `CircularView` object.
+```JAVA
+mAdapter = new MySimpleCircularViewAdapter();
+circularView = (CircularView) findViewById(R.id.circular_view);
+circularView.setAdapter(mAdapter);
+```
+
+###Receiving click listeners
+Click events can be received from the `CircularView`.
+
+####Center Click
+The center of the view is the center circle. This can be seen in the blue in the screenshot above. To receive this click event set a `View.OnClickListener` into `circularView.setOnCenterCircleClickListener(l)`. For example:
+```JAVA
+circularView.setOnCenterCircleClickListener(new View.OnClickListener() {
+	@Override
+	public void onClick(View v) {
+		// Do something.
+	}
+});
+```
+####Marker Click
+*Not yet implemented. Coming soon.*
+
+###Animation
+There are a few simple animations built into the library at the moment.
+####Animate Highlighted Degree
+The `CircularView` has `animateHighlightedDegree(start, end, duration)`. The method takes a start and end position in degrees, and a long value for the duration of the animation.
+The highlighted degree refers to which degree is "highlighted" or "focused". When a degree is focused it can trigger a secondary animation automatically for a `Marker`.
+
+
 ##Customization
+
+
+##Developer Hints
+* Every property that can be customized on a `CircularViewObject` can also be customized on a `Marker` object. A `Marker` object extends from a `CircularViewObject`. The former is used as a smaller object that floats around the center object. The center object is a `CircularViewObject`.
