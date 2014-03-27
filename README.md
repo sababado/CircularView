@@ -60,11 +60,11 @@ circularView.setAdapter(mAdapter);
 Click events can be received from the `CircularView`.
 
 ####Center Click
-The center of the view is the center circle. This can be seen in the blue in the screenshot above. To receive this click event set a `View.OnClickListener` into `circularView.setOnCenterCircleClickListener(l)`. For example:
+The center of the view is the center circle. This can be seen in the blue in the screenshot above. To receive this click event set a `CircularView.OnClickListener` into `circularView.setOnCircularViewObjectClickListener(l)`. For example:
 ```JAVA
-circularView.setOnCenterCircleClickListener(new View.OnClickListener() {
+circularView.setOnCircularViewObjectClickListener(new CircularView.OnClickListener() {
 	@Override
-	public void onClick(View v) {
+	public void onClick(final CircularView view, final CircularViewObject circularViewObject) {
 		// Do something.
 	}
 });

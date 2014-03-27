@@ -13,7 +13,6 @@ import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.StateSet;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -41,7 +40,7 @@ public class CircularView extends View {
 
     private BaseCircularViewAdapter mAdapter;
     private final AdapterDataSetObserver mAdapterDataSetObserver = new AdapterDataSetObserver();
-    private OnClickListener mOnCenterCircleClickListener;
+    private OnClickListener mOnCircularViewObjectClickListener;
 
     private ArrayList<Marker> mMarkerList;
     private CircularViewObject mCircle;
@@ -412,38 +411,33 @@ public class CircularView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean handled = false;
-        final int action = event.getAction();
 
-        //TODO There is a bug where the state doesn't seem to change on the first click (down/move/up)
-        final boolean isEventInCenterCircle =
-                mCircle == null ? false : mCircle.isInCenterCircle(event.getX(), event.getY());
-        if (action == MotionEvent.ACTION_DOWN) {
-            // check if center
-            if (isEventInCenterCircle) {
-                setCenterCircleState(PRESSED_STATE_SET);
-                handled = true;
-            }
-        } else if (action == MotionEvent.ACTION_UP) {
-            if (isEventInCenterCircle) {
-                setCenterCircleState(StateSet.NOTHING);
-                if (mOnCenterCircleClickListener != null) {
-                    mOnCenterCircleClickListener.onClick(this);
+        // check all markers
+        if(mMarkerList != null) {
+            for(final CircularViewObject object : mMarkerList) {
+                final int status = object.onTouchEvent(event);
+                if(status >= 0) {
+                    handled = true;
+                    if(status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
+                        mOnCircularViewObjectClickListener.onClick(this, object);
+                    }
+                    break;
                 }
-                handled = true;
-            }
-        } else if (action == MotionEvent.ACTION_MOVE) {
-            if (!isEventInCenterCircle) {
-                setCenterCircleState(StateSet.NOTHING);
-                handled = true;
             }
         }
-        return handled || super.onTouchEvent(event);
-    }
 
-    void setCenterCircleState(final int[] stateSet) {
-        if (mCircle != null) {
-            mCircle.setState(stateSet);
+        // check center circle
+        if(!handled && mCircle != null) {
+            final int status = mCircle.onTouchEvent(event);
+            if(status >= 0) {
+                handled = true;
+                if(status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
+                    mOnCircularViewObjectClickListener.onClick(this, mCircle);
+                }
+            }
         }
+
+        return handled || super.onTouchEvent(event);
     }
 
     /**
@@ -451,8 +445,8 @@ public class CircularView extends View {
      *
      * @param l Listener to receive a callback.
      */
-    public void setOnCenterCircleClickListener(OnClickListener l) {
-        mOnCenterCircleClickListener = l;
+    public void setOnCircularViewObjectClickListener(OnClickListener l) {
+        mOnCircularViewObjectClickListener = l;
     }
 
     /**
@@ -565,6 +559,18 @@ public class CircularView extends View {
     }
 
     /**
+     * Use this to register for click event callbacks from CircularEventObjects
+     */
+    public interface OnClickListener {
+        /**
+         * Called when the circular view object has been clicked.
+         * @param view The circular view that the object belongs to.
+         * @param circularViewObject The circular view object that was clicked.
+         */
+        public void onClick(CircularView view, CircularViewObject circularViewObject);
+    }
+
+    /**
      * This method converts device specific pixels to density independent pixels.
      *
      * @param px      A value in px (pixels) unit. Which we need to convert into db
@@ -577,5 +583,4 @@ public class CircularView extends View {
         float dp = px / (metrics.densityDpi / 160f);
         return dp;
     }
-
 }

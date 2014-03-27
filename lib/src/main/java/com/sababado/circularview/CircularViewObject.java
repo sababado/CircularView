@@ -7,6 +7,8 @@ import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.util.StateSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,15 +18,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class CircularViewObject {
     private static final AtomicInteger sAtomicIdCounter = new AtomicInteger(0);
-    protected int id;
+    private int id;
     protected float radius;
     protected float radiusPadding;
     protected float x;
     protected float y;
     private Paint paint;
-    protected Context context;
-    protected Drawable drawable;
-    protected CircularView.AdapterDataSetObserver mAdapterDataSetObserver;
+    private Context context;
+    private Drawable drawable;
+    private CircularView.AdapterDataSetObserver mAdapterDataSetObserver;
     private boolean fitToCircle;
 
     /**
@@ -146,9 +148,7 @@ public class CircularViewObject {
      */
     public void setSrc(final Drawable drawable) {
         this.drawable = drawable;
-        if (mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onInvalidated();
-        }
+        invalidate();
     }
 
     void setCallback(final View view) {
@@ -201,9 +201,7 @@ public class CircularViewObject {
      */
     public void setY(float y) {
         this.y = y;
-        if (mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onInvalidated();
-        }
+        invalidate();
     }
 
     /**
@@ -222,9 +220,7 @@ public class CircularViewObject {
      */
     public void setX(float x) {
         this.x = x;
-        if (mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onInvalidated();
-        }
+        invalidate();
     }
 
     /**
@@ -243,9 +239,7 @@ public class CircularViewObject {
      */
     public void setRadius(float radius) {
         this.radius = radius;
-        if (mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onInvalidated();
-        }
+        invalidate();
     }
 
     /**
@@ -264,9 +258,7 @@ public class CircularViewObject {
      */
     public void setRadiusPadding(float radiusPadding) {
         this.radiusPadding = radiusPadding;
-        if (mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onInvalidated();
-        }
+        invalidate();
     }
 
     /**
@@ -285,9 +277,7 @@ public class CircularViewObject {
      */
     public void setCenterBackgroundColor(int centerBackgroundColor) {
         paint.setColor(centerBackgroundColor);
-        if (mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onInvalidated();
-        }
+        invalidate();
     }
 
     CircularView.AdapterDataSetObserver getAdapterDataSetObserver() {
@@ -312,6 +302,43 @@ public class CircularViewObject {
      */
     public void setFitToCircle(boolean fitToCircle) {
         this.fitToCircle = fitToCircle;
+        invalidate();
+    }
+
+    /**
+     * Act on a touch event. Returns a status based on what action was taken.
+     * @param event The motion event that was just received.
+     * @return Return a negative number if the event wasn't handled. Return a MotionEvent action code if it was handled.
+     */
+    public int onTouchEvent(final MotionEvent event) {
+        int status = -2;
+        final int action = event.getAction();
+
+        final boolean isEventInCenterCircle = isInCenterCircle(event.getX(), event.getY());
+        if (action == MotionEvent.ACTION_DOWN) {
+            // check if center
+            if (isEventInCenterCircle) {
+                setState(CircularView.PRESSED_STATE_SET);
+                status = MotionEvent.ACTION_DOWN;
+            }
+        } else if (action == MotionEvent.ACTION_UP) {
+            if (isEventInCenterCircle) {
+                setState(StateSet.NOTHING);
+                status = MotionEvent.ACTION_UP;
+            }
+        } else if (action == MotionEvent.ACTION_MOVE) {
+            if (!isEventInCenterCircle) {
+                setState(StateSet.NOTHING);
+                status = MotionEvent.ACTION_MOVE;
+            }
+        }
+        return status;
+    }
+
+    /**
+     * Schedule the object's parent to redraw again.
+     */
+    protected void invalidate() {
         if(mAdapterDataSetObserver != null) {
             mAdapterDataSetObserver.onInvalidated();
         }

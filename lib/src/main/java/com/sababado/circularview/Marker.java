@@ -105,7 +105,7 @@ public class Marker extends CircularViewObject {
      */
     public void setHighlighted(boolean highlighted) {
         this.isHighlighted = highlighted;
-        mAdapterDataSetObserver.onInvalidated();
+        invalidate();
     }
 
     boolean isShouldAnimateWhenHighlighted() {
@@ -114,7 +114,7 @@ public class Marker extends CircularViewObject {
 
     void setShouldAnimateWhenHighlighted(boolean shouldAnimateWhenHighlighted) {
         this.shouldAnimateWhenHighlighted = shouldAnimateWhenHighlighted;
-        mAdapterDataSetObserver.onInvalidated();
+        invalidate();
     }
 
     /**

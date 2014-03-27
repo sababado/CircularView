@@ -3,8 +3,10 @@ package com.sababado.circularview.sample;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import com.sababado.circularview.CircularView;
+import com.sababado.circularview.CircularViewObject;
 import com.sababado.circularview.SimpleCircularViewAdapter;
 import com.sababado.circularview.Marker;
 
@@ -29,16 +31,21 @@ public class MainActivity extends Activity {
         // Combine the above line with the following so that the marker at it's position will animate at the start.
         circularView.setHighlightedDegree(circularView.BOTTOM);
 
-        circularView.setOnCenterCircleClickListener(new View.OnClickListener() {
+        circularView.setOnCircularViewObjectClickListener(new CircularView.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                // Start animation from the bottom of the circle, going clockwise.
-                final float start = CircularView.BOTTOM;
-                final float end = start + 360f + (float) (Math.random() * 720f);
-                // animate the highlighted degree value but also make sure it isn't so fast that it's skipping marker animations.
-                final long duration = (long) (Marker.ANIMATION_DURATION * 2L * end / (270L - mAdapter.getCount()));
+            public void onClick(final CircularView view, final CircularViewObject circularViewObject) {
+                Toast.makeText(MainActivity.this, "Clicked "+circularViewObject.getId(), Toast.LENGTH_SHORT).show();
 
-                circularView.animateHighlightedDegree(start, end, duration);
+                // Only animate the highlighted degree if the center circle is clicked.
+                if(circularView.getCenterCircle().getId() == circularViewObject.getId()) {
+                    // Start animation from the bottom of the circle, going clockwise.
+                    final float start = CircularView.BOTTOM;
+                    final float end = start + 360f + (float) (Math.random() * 720f);
+                    // animate the highlighted degree value but also make sure it isn't so fast that it's skipping marker animations.
+                    final long duration = (long) (Marker.ANIMATION_DURATION * 2L * end / (270L - mAdapter.getCount()));
+
+                    circularView.animateHighlightedDegree(start, end, duration);
+                }
             }
         });
     }
@@ -51,7 +58,7 @@ public class MainActivity extends Activity {
 
         @Override
         public void setupMarker(final int position, final Marker marker) {
-            marker.setSrc(R.drawable.ic_launcher);
+            marker.setSrc(R.drawable.center_bg);
             marker.setFitToCircle(true);
             marker.setRadius(10 + 2 * position);
         }
