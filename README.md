@@ -2,7 +2,9 @@ CircularView
 ============
 [![Build Status](https://travis-ci.org/sababado/CircularView.svg?branch=master)](https://travis-ci.org/sababado/CircularView)
 
-A custom view for Android. It consists of a larger center circle that it surrounded by other circles. Each of the surrounding circles (or `CircularViewObject`'s
+[Trello Project Board](https://trello.com/b/RV5JNOjD/circularview-android-library)
+
+A custom view for Android. It consists of a larger center circle that it surrounded by other circles. Each of the surrounding circles (or `CircularViewObject`'s) can be represented by data or simply as a visual.
 
 ![Quick example screenshot](http://s27.postimg.org/a9nzujq8z/Circular_View_example.png)
 
