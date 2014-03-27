@@ -177,8 +177,9 @@ public class CircularView extends View {
             assert (markerCount >= 0);
             if (mMarkerList == null) {
                 mMarkerList = new ArrayList(markerCount);
+            } else {
             }
-            final int markerViewListSize = mMarkerList.size();
+            int markerViewListSize = mMarkerList.size();
             final float degreeInterval = 360.0f / markerCount;
             final float radiusFromCenter = mCircle.getRadius() + CIRCLE_TO_MARKER_PADDING + mMarkerRadius;
             int position = 0;
@@ -214,6 +215,12 @@ public class CircularView extends View {
                 mAdapter.setupMarker(position, newMarker);
 
                 position++;
+            }
+            // Remove extra markers that aren't used in this list anymore.
+            markerViewListSize = mMarkerList.size();
+            for(;position < markerViewListSize; position++){
+                mMarkerList.remove(position--);
+                markerViewListSize--;
             }
             mMarkerList.trimToSize();
             if (mHighlightedDegree != HIGHLIGHT_NONE) {
@@ -545,7 +552,7 @@ public class CircularView extends View {
     class AdapterDataSetObserver extends DataSetObserver {
         @Override
         public void onChanged() {
-            invalidate();
+            requestLayout();
         }
 
         /**
@@ -553,7 +560,7 @@ public class CircularView extends View {
          */
         @Override
         public void onInvalidated() {
-            onChanged();
+            invalidate();
         }
     }
 

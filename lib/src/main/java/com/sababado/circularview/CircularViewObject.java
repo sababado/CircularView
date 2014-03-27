@@ -147,7 +147,7 @@ public class CircularViewObject {
     public void setSrc(final Drawable drawable) {
         this.drawable = drawable;
         if (mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onChanged();
+            mAdapterDataSetObserver.onInvalidated();
         }
     }
 
@@ -202,7 +202,7 @@ public class CircularViewObject {
     public void setY(float y) {
         this.y = y;
         if (mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onChanged();
+            mAdapterDataSetObserver.onInvalidated();
         }
     }
 
@@ -223,7 +223,7 @@ public class CircularViewObject {
     public void setX(float x) {
         this.x = x;
         if (mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onChanged();
+            mAdapterDataSetObserver.onInvalidated();
         }
     }
 
@@ -244,7 +244,7 @@ public class CircularViewObject {
     public void setRadius(float radius) {
         this.radius = radius;
         if (mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onChanged();
+            mAdapterDataSetObserver.onInvalidated();
         }
     }
 
@@ -265,7 +265,7 @@ public class CircularViewObject {
     public void setRadiusPadding(float radiusPadding) {
         this.radiusPadding = radiusPadding;
         if (mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onChanged();
+            mAdapterDataSetObserver.onInvalidated();
         }
     }
 
@@ -286,7 +286,7 @@ public class CircularViewObject {
     public void setCenterBackgroundColor(int centerBackgroundColor) {
         paint.setColor(centerBackgroundColor);
         if (mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onChanged();
+            mAdapterDataSetObserver.onInvalidated();
         }
     }
 
@@ -313,7 +313,7 @@ public class CircularViewObject {
     public void setFitToCircle(boolean fitToCircle) {
         this.fitToCircle = fitToCircle;
         if(mAdapterDataSetObserver != null) {
-            mAdapterDataSetObserver.onChanged();
+            mAdapterDataSetObserver.onInvalidated();
         }
     }
 

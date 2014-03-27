@@ -1,6 +1,5 @@
 package com.sababado.circularview;
 
-import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.DataSetObservable;
@@ -19,6 +18,7 @@ import android.widget.CursorAdapter;
  * columns.
  */
 public abstract class CircularViewCursorAdapter implements BaseCircularViewAdapter {
+    private static final String TAG = CircularViewCursorAdapter.class.getSimpleName();
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
     protected boolean mDataValid;
     protected boolean mAutoRequery;
