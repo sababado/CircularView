@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.util.StateSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -15,8 +14,46 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * TODO Document
+ * don't forget refs
  */
 public class CircularViewObject {
+
+    /*
+     * View states are largely copied from View.java.
+     * Not all states are required at the moment so there are some gaps.
+     */
+    private static final int[][] VIEW_STATE_SETS;
+    static final int VIEW_STATE_SELECTED = 1 << 1;
+    static final int VIEW_STATE_FOCUSED = 1 << 2;
+    static final int VIEW_STATE_PRESSED = 1 << 4;
+
+    static final int[] VIEW_STATE_IDS = new int[]{
+            0,0,
+            android.R.attr.state_selected, VIEW_STATE_SELECTED,
+            android.R.attr.state_focused, VIEW_STATE_FOCUSED,
+            0,0,
+            android.R.attr.state_pressed, VIEW_STATE_PRESSED
+    };
+
+    static {
+        final int NUM_BITS = VIEW_STATE_IDS.length / 2;
+        VIEW_STATE_SETS = new int[1 << NUM_BITS][];
+
+        VIEW_STATE_SETS[0] = StateSet.NOTHING;
+        VIEW_STATE_SETS[VIEW_STATE_SELECTED] = new int[]{android.R.attr.state_selected};
+        VIEW_STATE_SETS[VIEW_STATE_FOCUSED] = new int[]{android.R.attr.state_focused};
+        VIEW_STATE_SETS[VIEW_STATE_PRESSED] = new int[]{android.R.attr.state_pressed};
+        VIEW_STATE_SETS[VIEW_STATE_SELECTED | VIEW_STATE_FOCUSED]
+                = new int[]{android.R.attr.state_selected, android.R.attr.state_focused};
+        VIEW_STATE_SETS[VIEW_STATE_SELECTED | VIEW_STATE_PRESSED]
+                = new int[]{android.R.attr.state_selected, android.R.attr.state_pressed};
+        VIEW_STATE_SETS[VIEW_STATE_PRESSED | VIEW_STATE_FOCUSED]
+                = new int[]{android.R.attr.state_pressed, android.R.attr.state_focused};
+        VIEW_STATE_SETS[VIEW_STATE_SELECTED | VIEW_STATE_PRESSED | VIEW_STATE_FOCUSED]
+                = new int[]{android.R.attr.state_selected, android.R.attr.state_pressed, android.R.attr.state_focused};
+    }
+
+    private int mCombinedState;
     private static final AtomicInteger sAtomicIdCounter = new AtomicInteger(0);
     private int id;
     protected float radius;
@@ -72,7 +109,7 @@ public class CircularViewObject {
             float rightOffset = radius - radiusPadding;
             float bottomOffset = radius - radiusPadding;
             if (fitToCircle) {
-                final double extraOffset = distanceFromCenter(x+leftOffset, y+topOffset) - radius;
+                final double extraOffset = distanceFromCenter(x + leftOffset, y + topOffset) - radius;
                 leftOffset += extraOffset;
                 topOffset += extraOffset;
                 rightOffset -= extraOffset;
@@ -174,6 +211,23 @@ public class CircularViewObject {
             }
         }
         return appearanceChange;
+    }
+
+    /**
+     * Either remove or add a state to the combined state.
+     * @param state State to add or remove.
+     * @param flag True to add, false to remove.
+     */
+    public void updateDrawableState(int state, boolean flag) {
+        final int oldState = mCombinedState;
+        // Update the combined state flag
+        if(flag) mCombinedState |= state;
+        else mCombinedState &= ~state;
+
+        // Set the combined state
+        if(oldState != mCombinedState) {
+            setState(VIEW_STATE_SETS[mCombinedState]);
+        }
     }
 
     /**
@@ -290,6 +344,7 @@ public class CircularViewObject {
 
     /**
      * True if the object's drawable should fit inside the center circle. False if it will not.
+     *
      * @return True if the object's drawable should fit inside the center circle. False if it will not.
      */
     public boolean isFitToCircle() {
@@ -298,6 +353,7 @@ public class CircularViewObject {
 
     /**
      * Set to true if this object's drawable should fit inside of the center circle and false if not.
+     *
      * @param fitToCircle Flag to determine if this drawable should fit inside the center circle.
      */
     public void setFitToCircle(boolean fitToCircle) {
@@ -307,6 +363,7 @@ public class CircularViewObject {
 
     /**
      * Act on a touch event. Returns a status based on what action was taken.
+     *
      * @param event The motion event that was just received.
      * @return Return a negative number if the event wasn't handled. Return a MotionEvent action code if it was handled.
      */
@@ -318,18 +375,19 @@ public class CircularViewObject {
         if (action == MotionEvent.ACTION_DOWN) {
             // check if center
             if (isEventInCenterCircle) {
-                setState(CircularView.PRESSED_STATE_SET);
+                updateDrawableState(VIEW_STATE_PRESSED, true);
                 status = MotionEvent.ACTION_DOWN;
             }
         } else if (action == MotionEvent.ACTION_UP) {
-            if (isEventInCenterCircle) {
-                setState(StateSet.NOTHING);
+            final boolean isPressed = (mCombinedState & VIEW_STATE_PRESSED) != 0;
+            if (isPressed && isEventInCenterCircle) {
+                updateDrawableState(VIEW_STATE_PRESSED, false);
                 status = MotionEvent.ACTION_UP;
             }
+
         } else if (action == MotionEvent.ACTION_MOVE) {
             if (!isEventInCenterCircle) {
-                setState(StateSet.NOTHING);
-                status = MotionEvent.ACTION_MOVE;
+                updateDrawableState(VIEW_STATE_PRESSED, false);
             }
         }
         return status;
@@ -339,7 +397,7 @@ public class CircularViewObject {
      * Schedule the object's parent to redraw again.
      */
     protected void invalidate() {
-        if(mAdapterDataSetObserver != null) {
+        if (mAdapterDataSetObserver != null) {
             mAdapterDataSetObserver.onInvalidated();
         }
     }

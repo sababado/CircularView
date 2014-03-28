@@ -23,8 +23,6 @@ import java.util.ArrayList;
  */
 public class CircularView extends View {
     private static final String TAG = CircularView.class.getSimpleName();
-    public static final int[] PRESSED_STATE_SET = new int[]{android.R.attr.state_pressed};
-    public static final int[] DE_PRESSED_STATE_SET = new int[]{-android.R.attr.state_pressed};
     private String mText; //TODO add customization for the text (style, color, etc)
     private float mExampleDimension = 0; // TODO: use a default from R.dimen...
 
@@ -417,7 +415,7 @@ public class CircularView extends View {
             for(final CircularViewObject object : mMarkerList) {
                 final int status = object.onTouchEvent(event);
                 if(status >= 0) {
-                    handled = true;
+                    handled = status != MotionEvent.ACTION_MOVE;
                     if(status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
                         mOnCircularViewObjectClickListener.onClick(this, object);
                     }
@@ -436,6 +434,7 @@ public class CircularView extends View {
                 }
             }
         }
+
 
         return handled || super.onTouchEvent(event);
     }

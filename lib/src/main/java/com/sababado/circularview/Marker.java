@@ -105,6 +105,7 @@ public class Marker extends CircularViewObject {
      */
     public void setHighlighted(boolean highlighted) {
         this.isHighlighted = highlighted;
+        updateDrawableState(VIEW_STATE_FOCUSED, highlighted);
         invalidate();
     }
 
