@@ -112,3 +112,4 @@ The latter line is necessary in case the bounce animation should also run initia
 
 ##Developer Hints
 * Every property that can be customized on a `CircularViewObject` can also be customized on a `Marker` object. A `Marker` object extends from a `CircularViewObject`. The former is used as a smaller object that floats around the center object. The center object is a `CircularViewObject`.
+* By default, markers are drawn in the order that they're created; meaning if markers overlap then the first marker will be partially covered by the next marker. An option can be set to draw the highlighted marker on top of the markers next to it with `circularView.setDrawHighlightedMarkerOnTop(true);`. The flag is false by default.

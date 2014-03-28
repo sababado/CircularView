@@ -45,6 +45,7 @@ public class CircularView extends View {
     private CircularViewObject mCircle;
     private float mHighlightedDegree;
     private Marker mHighlightedMarker;
+    private boolean mDrawHighlightedMarkerOnTop;
     /**
      * Use this to specify that no degree should be highlighted.
      */
@@ -125,6 +126,8 @@ public class CircularView extends View {
         mCirclePaint.setStyle(Paint.Style.FILL);
         mCirclePaint.setColor(Color.RED);
 
+        mDrawHighlightedMarkerOnTop = false;
+        mHighlightedMarker = null;
         mHighlightedDegree = HIGHLIGHT_NONE;
         mAnimateMarkersOnStillHighlight = false;
         mAnimateMarkersOnHighlightAnimation = false;
@@ -253,14 +256,14 @@ public class CircularView extends View {
         // Draw non-highlighted Markers
         if (mMarkerList != null && !mMarkerList.isEmpty()) {
             for (final Marker marker : mMarkerList) {
-                if(!marker.equals(mHighlightedMarker)) {
+                if (!mDrawHighlightedMarkerOnTop || !marker.equals(mHighlightedMarker)) {
                     marker.draw(canvas);
                 }
             }
         }
 
         // Draw highlighted marker
-        if(mHighlightedMarker != null) {
+        if (mDrawHighlightedMarkerOnTop && mHighlightedMarker != null) {
             mHighlightedMarker.draw(canvas);
         }
 
@@ -420,10 +423,30 @@ public class CircularView extends View {
 
     /**
      * Get the marker that is currently highlighted. Null is returned if no marker is highlighted.
+     *
      * @return The marker that is currently highlighted.
      */
     public Marker getHighlightedMarker() {
         return mHighlightedMarker;
+    }
+
+    /**
+     * Returns the flag the determines if the highlighted marker will draw on top of other markers.
+     *
+     * @return True if the highlighted marker will draw on top of other markers, false if they're all drawn in order.
+     */
+    public boolean isDrawHighlightedMarkerOnTop() {
+        return mDrawHighlightedMarkerOnTop;
+    }
+
+    /**
+     * Set the flag that determines if the highlighted marker will draw on top of other markers.
+     * This is false by default.
+     *
+     * @param drawHighlightedMarkerOnTop the flag that determines if the highlighted marker will draw on top of other markers.
+     */
+    public void setDrawHighlightedMarkerOnTop(boolean drawHighlightedMarkerOnTop) {
+        this.mDrawHighlightedMarkerOnTop = drawHighlightedMarkerOnTop;
     }
 
     @Override
