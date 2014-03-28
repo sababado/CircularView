@@ -185,10 +185,11 @@ public class CircularView extends View {
             final float degreeInterval = 360.0f / markerCount;
             final float radiusFromCenter = mCircle.getRadius() + CIRCLE_TO_MARKER_PADDING + mMarkerRadius;
             int position = 0;
+            float degree = 0;
             // loop clockwise
-            for (float i = 0; i < 360f; i += degreeInterval) {
+            for (; position < markerCount; position++) {
                 final boolean positionHasExistingMarkerInList = position < markerViewListSize;
-                final float actualDegree = normalizeDegree(i + 90f);
+                final float actualDegree = normalizeDegree(degree + 90f);
                 final double rad = Math.toRadians(actualDegree);
                 final float sectionMin = actualDegree - degreeInterval / 2f;
 
@@ -216,7 +217,7 @@ public class CircularView extends View {
                 // get the new marker view.
                 mAdapter.setupMarker(position, newMarker);
 
-                position++;
+                degree += degreeInterval;
             }
             // Remove extra markers that aren't used in this list anymore.
             markerViewListSize = mMarkerList.size();

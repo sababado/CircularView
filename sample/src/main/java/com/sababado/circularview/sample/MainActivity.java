@@ -2,6 +2,8 @@ package com.sababado.circularview.sample;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -14,7 +16,7 @@ import com.sababado.circularview.Marker;
 public class MainActivity extends Activity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private SimpleCircularViewAdapter mAdapter;
+    private MySimpleCircularViewAdapter mAdapter;
     private CircularView circularView;
 
     @Override
@@ -58,9 +60,10 @@ public class MainActivity extends Activity {
     }
 
     public class MySimpleCircularViewAdapter extends SimpleCircularViewAdapter {
+        int count = 29;
         @Override
         public int getCount() {
-            return 20;
+            return count;
         }
 
         @Override
@@ -69,5 +72,28 @@ public class MainActivity extends Activity {
             marker.setFitToCircle(true);
             marker.setRadius(10 + 2 * position);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        final int id = item.getItemId();
+        boolean handled = false;
+        if(id == R.id.increment) {
+            mAdapter.count++;
+            handled = true;
+            mAdapter.notifyDataSetChanged();
+        } else if(id == R.id.decrement) {
+            mAdapter.count--;
+            handled = true;
+            mAdapter.notifyDataSetChanged();
+        }
+        Toast.makeText(MainActivity.this, "Object count "+mAdapter.getCount(), Toast.LENGTH_SHORT).show();
+        return handled || super.onOptionsItemSelected(item);
     }
 }
