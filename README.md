@@ -59,18 +59,19 @@ circularView.setAdapter(mAdapter);
 ###Receiving click listeners
 Click events can be received from the `CircularView`.
 
-####Center Click
-The center of the view is the center circle. This can be seen in the blue in the screenshot above. To receive this click event set a `CircularView.OnClickListener` into `circularView.setOnCircularViewObjectClickListener(l)`. For example:
+To receive click events set a `CircularView.OnClickListener` into `circularView.setOnCircularViewObjectClickListener(l)`. For example:
 ```JAVA
 circularView.setOnCircularViewObjectClickListener(new CircularView.OnClickListener() {
 	@Override
 	public void onClick(final CircularView view, final CircularViewObject circularViewObject) {
-		// Do something.
+		if(circularView.getCenterCircle().getId() == circularViewObject.getId()) {
+		    // This is the center circle (aka not one of the floating markers)
+		} else {
+		    // A marker was clicked!
+		}
 	}
 });
 ```
-####Marker Click
-*Not yet implemented. Coming soon.*
 
 ###Animation
 There are a few simple animations built into the library at the moment.
