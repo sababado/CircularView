@@ -48,6 +48,13 @@ public class MainActivity extends Activity {
                 }
             }
         });
+
+        circularView.setOnHighlightAnimationEndListener(new CircularView.OnHighlightAnimationEndListener() {
+            @Override
+            public void onHighlightAnimationEnd(CircularView view, CircularViewObject circularViewObject) {
+                Toast.makeText(MainActivity.this, "Spin ends on "+circularViewObject.getId(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public class MySimpleCircularViewAdapter extends SimpleCircularViewAdapter {

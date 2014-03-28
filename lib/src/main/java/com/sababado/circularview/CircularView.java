@@ -39,10 +39,12 @@ public class CircularView extends View {
     private BaseCircularViewAdapter mAdapter;
     private final AdapterDataSetObserver mAdapterDataSetObserver = new AdapterDataSetObserver();
     private OnClickListener mOnCircularViewObjectClickListener;
+    private OnHighlightAnimationEndListener mOnHighlightAnimationEndListener;
 
     private ArrayList<Marker> mMarkerList;
     private CircularViewObject mCircle;
     private float mHighlightedDegree;
+    private Marker mHighlightedMarker;
     /**
      * Use this to specify that no degree should be highlighted.
      */
@@ -50,7 +52,7 @@ public class CircularView extends View {
     private boolean mAnimateMarkersOnStillHighlight;
     private boolean mAnimateMarkersOnHighlightAnimation;
     private boolean mIsAnimating;
-    ObjectAnimator mHighlightedDegreeObjectAnimator;
+    private ObjectAnimator mHighlightedDegreeObjectAnimator;
 
     private int paddingLeft;
     private int paddingTop;
@@ -215,7 +217,7 @@ public class CircularView extends View {
             }
             // Remove extra markers that aren't used in this list anymore.
             markerViewListSize = mMarkerList.size();
-            for(;position < markerViewListSize; position++){
+            for (; position < markerViewListSize; position++) {
                 mMarkerList.remove(position--);
                 markerViewListSize--;
             }
@@ -352,21 +354,26 @@ public class CircularView extends View {
         this.mHighlightedDegree = highlightedDegree;
         invalidateTextPaintAndMeasurements();
 
+        mHighlightedMarker = null;
+        // Loop through all markers to see if any of them are highlighted.
         if (mMarkerList != null) {
             for (final Marker marker : mMarkerList) {
                 final boolean markerIsHighlighted = mHighlightedDegree != HIGHLIGHT_NONE && marker.hasInSection(mHighlightedDegree % 360);
                 marker.setHighlighted(markerIsHighlighted);
-                final boolean highlightAnimationAndAnimateMarker = mIsAnimating && mAnimateMarkersOnHighlightAnimation;
-                final boolean stillAndAnimateMarker = !mIsAnimating && mAnimateMarkersOnStillHighlight;
-                final boolean wantsToAnimateMarker = highlightAnimationAndAnimateMarker || stillAndAnimateMarker;
-                if (wantsToAnimateMarker
-                        && markerIsHighlighted
-                        && !marker.isAnimating()) {
-                    marker.animateBounce();
+                if (markerIsHighlighted) {
+                    // Marker is highlighted!
+                    mHighlightedMarker = marker;
+                    final boolean highlightAnimationAndAnimateMarker = mIsAnimating && mAnimateMarkersOnHighlightAnimation;
+                    final boolean stillAndAnimateMarker = !mIsAnimating && mAnimateMarkersOnStillHighlight;
+                    final boolean wantsToAnimateMarker = highlightAnimationAndAnimateMarker || stillAndAnimateMarker;
+                    // Animate only if necessary
+                    if (wantsToAnimateMarker && !marker.isAnimating()) {
+                        marker.animateBounce();
+                    }
                 }
+                // Continue looping through the rest to reset other markers.
             }
         }
-
         invalidate();
     }
 
@@ -406,17 +413,25 @@ public class CircularView extends View {
         return mCircle;
     }
 
+    /**
+     * Get the marker that is currently highlighted. Null is returned if no marker is highlighted.
+     * @return The marker that is currently highlighted.
+     */
+    public Marker getHighlightedMarker() {
+        return mHighlightedMarker;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean handled = false;
 
         // check all markers
-        if(mMarkerList != null) {
-            for(final CircularViewObject object : mMarkerList) {
+        if (mMarkerList != null) {
+            for (final CircularViewObject object : mMarkerList) {
                 final int status = object.onTouchEvent(event);
-                if(status >= 0) {
+                if (status >= 0) {
                     handled = status != MotionEvent.ACTION_MOVE;
-                    if(status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
+                    if (status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
                         mOnCircularViewObjectClickListener.onClick(this, object);
                     }
                     break;
@@ -425,11 +440,11 @@ public class CircularView extends View {
         }
 
         // check center circle
-        if(!handled && mCircle != null) {
+        if (!handled && mCircle != null) {
             final int status = mCircle.onTouchEvent(event);
-            if(status >= 0) {
+            if (status >= 0) {
                 handled = true;
-                if(status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
+                if (status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
                     mOnCircularViewObjectClickListener.onClick(this, mCircle);
                 }
             }
@@ -444,8 +459,18 @@ public class CircularView extends View {
      *
      * @param l Listener to receive a callback.
      */
-    public void setOnCircularViewObjectClickListener(OnClickListener l) {
+    public void setOnCircularViewObjectClickListener(final OnClickListener l) {
         mOnCircularViewObjectClickListener = l;
+    }
+
+    /**
+     * Set the listener that will receive callbacks when a highlight animation has ended.
+     *
+     * @param l Listener to receive callbacks.
+     * @see #animateHighlightedDegree(float, float, long)
+     */
+    public void setOnHighlightAnimationEndListener(final OnHighlightAnimationEndListener l) {
+        mOnHighlightAnimationEndListener = l;
     }
 
     /**
@@ -489,8 +514,12 @@ public class CircularView extends View {
         @Override
         public void onAnimationEnd(Animator animation) {
             mAnimateMarkersOnHighlightAnimation = mIsAnimating = false;
-            if(!mAnimationWasCanceled) {
+            if (!mAnimationWasCanceled) {
                 setHighlightedDegree(getHighlightedDegree());
+                if (mOnHighlightAnimationEndListener != null) {
+                    // Highlighted marker will be set by setHighlightedDegree
+                    mOnHighlightAnimationEndListener.onHighlightAnimationEnd(CircularView.this, mHighlightedMarker);
+                }
             } else {
                 mAnimationWasCanceled = false;
             }
@@ -563,10 +592,24 @@ public class CircularView extends View {
     public interface OnClickListener {
         /**
          * Called when the circular view object has been clicked.
-         * @param view The circular view that the object belongs to.
+         *
+         * @param view               The circular view that the object belongs to.
          * @param circularViewObject The circular view object that was clicked.
          */
         public void onClick(CircularView view, CircularViewObject circularViewObject);
+    }
+
+    /**
+     * Use this to register for callback events when the highlight animation finishes executing.
+     */
+    public interface OnHighlightAnimationEndListener {
+        /**
+         * Called when the highlight animation ends. This is <b>not</b> called when the animation is canceled.
+         *
+         * @param view               The circular view that the object belongs to.
+         * @param circularViewObject The circular view object that the animation ended on.
+         */
+        public void onHighlightAnimationEnd(CircularView view, CircularViewObject circularViewObject);
     }
 
     /**

@@ -79,6 +79,16 @@ There are a few simple animations built into the library at the moment.
 The `CircularView` has `animateHighlightedDegree(start, end, duration)`. The method takes a start and end position in degrees, and a long value for the duration of the animation.
 The highlighted degree refers to which degree is "highlighted" or "focused". When a degree is focused it can trigger a secondary animation automatically for a `Marker`.
 
+A listener can be set to receive a callback when this animation ends, and on what object it stopped on.
+```JAVA
+circularView.setOnHighlightAnimationEndListener(new CircularView.OnHighlightAnimationEndListener() {
+    @Override
+    public void onHighlightAnimationEnd(CircularView view, CircularViewObject circularViewObject) {
+        Toast.makeText(MainActivity.this, "Spin ends on "+circularViewObject.getId(), Toast.LENGTH_SHORT).show();
+    }
+});
+```
+
 ####Marker Animation Options
 `Marker`s have a simple animation associated with them; up and down. It can repeat or it can happen once.
 The `CircularView` can trigger the bounce animation when `animateHighlightedDegree(start, end, duration)` is called. The bounce animation can be turned off by calling the same method with an additional flag.
