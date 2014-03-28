@@ -250,13 +250,18 @@ public class CircularView extends View {
         mCirclePaint.setColor(Color.RED);
         // Draw CircularViewObject
         mCircle.draw(canvas);
-        // Draw Markers
+        // Draw non-highlighted Markers
         if (mMarkerList != null && !mMarkerList.isEmpty()) {
-            mCirclePaint.setStyle(Paint.Style.STROKE);
-            mCirclePaint.setColor(Color.BLUE);
             for (final Marker marker : mMarkerList) {
-                marker.draw(canvas);
+                if(!marker.equals(mHighlightedMarker)) {
+                    marker.draw(canvas);
+                }
             }
+        }
+
+        // Draw highlighted marker
+        if(mHighlightedMarker != null) {
+            mHighlightedMarker.draw(canvas);
         }
 
         // Draw line
