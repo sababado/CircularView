@@ -62,14 +62,13 @@ Click events can be received from the `CircularView`.
 To receive click events set a `CircularView.OnClickListener` into `circularView.setOnCircularViewObjectClickListener(l)`. For example:
 ```JAVA
 circularView.setOnCircularViewObjectClickListener(new CircularView.OnClickListener() {
-	@Override
-	public void onClick(final CircularView view, final CircularViewObject circularViewObject) {
-		if(circularView.getCenterCircle().getId() == circularViewObject.getId()) {
-		    // This is the center circle (aka not one of the floating markers)
-		} else {
-		    // A marker was clicked!
-		}
-	}
+	 public void onClick(final CircularView view) {
+        Toast.makeText(MainActivity.this, "Clicked center", Toast.LENGTH_SHORT).show();
+    }
+
+    public void onMarkerClick(CircularView view, Marker marker, int position) {
+        Toast.makeText(MainActivity.this, "Clicked " + marker.getId(), Toast.LENGTH_SHORT).show();
+    }
 });
 ```
 
@@ -83,8 +82,8 @@ A listener can be set to receive a callback when this animation ends, and on wha
 ```JAVA
 circularView.setOnHighlightAnimationEndListener(new CircularView.OnHighlightAnimationEndListener() {
     @Override
-    public void onHighlightAnimationEnd(CircularView view, CircularViewObject circularViewObject) {
-        Toast.makeText(MainActivity.this, "Spin ends on "+circularViewObject.getId(), Toast.LENGTH_SHORT).show();
+    public void onHighlightAnimationEnd(CircularView view, Marker marker, int position) {
+        Toast.makeText(MainActivity.this, "Spin ends on " + marker.getId(), Toast.LENGTH_SHORT).show();
     }
 });
 ```

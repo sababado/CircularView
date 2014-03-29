@@ -35,32 +35,34 @@ public class MainActivity extends Activity {
 
         circularView.setOnCircularViewObjectClickListener(new CircularView.OnClickListener() {
             @Override
-            public void onClick(final CircularView view, final CircularViewObject circularViewObject) {
-                Toast.makeText(MainActivity.this, "Clicked "+circularViewObject.getId(), Toast.LENGTH_SHORT).show();
+            public void onClick(final CircularView view) {
+                Toast.makeText(MainActivity.this, "Clicked center", Toast.LENGTH_SHORT).show();
 
-                // Only animate the highlighted degree if the center circle is clicked.
-                if(circularView.getCenterCircle().getId() == circularViewObject.getId()) {
-                    // Start animation from the bottom of the circle, going clockwise.
-                    final float start = CircularView.BOTTOM;
-                    final float end = start + 360f + (float) (Math.random() * 720f);
-                    // animate the highlighted degree value but also make sure it isn't so fast that it's skipping marker animations.
-                    final long duration = (long) (Marker.ANIMATION_DURATION * 2L * end / (270L - mAdapter.getCount()));
+                // Start animation from the bottom of the circle, going clockwise.
+                final float start = CircularView.BOTTOM;
+                final float end = start + 360f + (float) (Math.random() * 720f);
+                // animate the highlighted degree value but also make sure it isn't so fast that it's skipping marker animations.
+                final long duration = (long) (Marker.ANIMATION_DURATION * 2L * end / (270L - mAdapter.getCount()));
 
-                    circularView.animateHighlightedDegree(start, end, duration);
-                }
+                circularView.animateHighlightedDegree(start, end, duration);
+            }
+
+            public void onMarkerClick(CircularView view, Marker marker, int position) {
+                Toast.makeText(MainActivity.this, "Clicked " + marker.getId(), Toast.LENGTH_SHORT).show();
             }
         });
 
         circularView.setOnHighlightAnimationEndListener(new CircularView.OnHighlightAnimationEndListener() {
             @Override
-            public void onHighlightAnimationEnd(CircularView view, CircularViewObject circularViewObject) {
-                Toast.makeText(MainActivity.this, "Spin ends on "+circularViewObject.getId(), Toast.LENGTH_SHORT).show();
+            public void onHighlightAnimationEnd(CircularView view, Marker marker, int position) {
+                Toast.makeText(MainActivity.this, "Spin ends on " + marker.getId(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     public class MySimpleCircularViewAdapter extends SimpleCircularViewAdapter {
         int count = 29;
+
         @Override
         public int getCount() {
             return count;
@@ -84,16 +86,16 @@ public class MainActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         final int id = item.getItemId();
         boolean handled = false;
-        if(id == R.id.increment) {
+        if (id == R.id.increment) {
             mAdapter.count++;
             handled = true;
             mAdapter.notifyDataSetChanged();
-        } else if(id == R.id.decrement) {
+        } else if (id == R.id.decrement) {
             mAdapter.count--;
             handled = true;
             mAdapter.notifyDataSetChanged();
         }
-        Toast.makeText(MainActivity.this, "Object count "+mAdapter.getCount(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, "Object count " + mAdapter.getCount(), Toast.LENGTH_SHORT).show();
         return handled || super.onOptionsItemSelected(item);
     }
 }

@@ -45,6 +45,7 @@ public class CircularView extends View {
     private CircularViewObject mCircle;
     private float mHighlightedDegree;
     private Marker mHighlightedMarker;
+    private int mHighlightedMarkerPosition;
     private boolean mDrawHighlightedMarkerOnTop;
     /**
      * Use this to specify that no degree should be highlighted.
@@ -128,6 +129,7 @@ public class CircularView extends View {
 
         mDrawHighlightedMarkerOnTop = false;
         mHighlightedMarker = null;
+        mHighlightedMarkerPosition = -1;
         mHighlightedDegree = HIGHLIGHT_NONE;
         mAnimateMarkersOnStillHighlight = false;
         mAnimateMarkersOnHighlightAnimation = false;
@@ -364,14 +366,18 @@ public class CircularView extends View {
         invalidateTextPaintAndMeasurements();
 
         mHighlightedMarker = null;
+        mHighlightedMarkerPosition = -1;
         // Loop through all markers to see if any of them are highlighted.
         if (mMarkerList != null) {
-            for (final Marker marker : mMarkerList) {
+            final int size = mMarkerList.size();
+            for (int i=0; i<size; i++) {
+                final Marker marker = mMarkerList.get(i);
                 final boolean markerIsHighlighted = mHighlightedDegree != HIGHLIGHT_NONE && marker.hasInSection(mHighlightedDegree % 360);
                 marker.setHighlighted(markerIsHighlighted);
                 if (markerIsHighlighted) {
                     // Marker is highlighted!
                     mHighlightedMarker = marker;
+                    mHighlightedMarkerPosition = i;
                     final boolean highlightAnimationAndAnimateMarker = mIsAnimating && mAnimateMarkersOnHighlightAnimation;
                     final boolean stillAndAnimateMarker = !mIsAnimating && mAnimateMarkersOnStillHighlight;
                     final boolean wantsToAnimateMarker = highlightAnimationAndAnimateMarker || stillAndAnimateMarker;
@@ -456,15 +462,17 @@ public class CircularView extends View {
 
         // check all markers
         if (mMarkerList != null) {
-            for (final CircularViewObject object : mMarkerList) {
-                final int status = object.onTouchEvent(event);
+            int position = 0;
+            for (final Marker marker : mMarkerList) {
+                final int status = marker.onTouchEvent(event);
                 if (status >= 0) {
                     handled = status != MotionEvent.ACTION_MOVE;
                     if (status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
-                        mOnCircularViewObjectClickListener.onClick(this, object);
+                        mOnCircularViewObjectClickListener.onMarkerClick(this, marker, position);
                     }
                     break;
                 }
+                position++;
             }
         }
 
@@ -474,7 +482,7 @@ public class CircularView extends View {
             if (status >= 0) {
                 handled = true;
                 if (status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
-                    mOnCircularViewObjectClickListener.onClick(this, mCircle);
+                    mOnCircularViewObjectClickListener.onClick(this);
                 }
             }
         }
@@ -545,9 +553,9 @@ public class CircularView extends View {
             mAnimateMarkersOnHighlightAnimation = mIsAnimating = false;
             if (!mAnimationWasCanceled) {
                 setHighlightedDegree(getHighlightedDegree());
-                if (mOnHighlightAnimationEndListener != null) {
+                if (mOnHighlightAnimationEndListener != null && mHighlightedMarker != null) {
                     // Highlighted marker will be set by setHighlightedDegree
-                    mOnHighlightAnimationEndListener.onHighlightAnimationEnd(CircularView.this, mHighlightedMarker);
+                    mOnHighlightAnimationEndListener.onHighlightAnimationEnd(CircularView.this, mHighlightedMarker, mHighlightedMarkerPosition);
                 }
             } else {
                 mAnimationWasCanceled = false;
@@ -620,12 +628,20 @@ public class CircularView extends View {
      */
     public interface OnClickListener {
         /**
-         * Called when the circular view object has been clicked.
+         * Called when the center view object has been clicked.
          *
-         * @param view               The circular view that the object belongs to.
-         * @param circularViewObject The circular view object that was clicked.
+         * @param view The circular view that was clicked.
          */
-        public void onClick(CircularView view, CircularViewObject circularViewObject);
+        public void onClick(CircularView view);
+
+        /**
+         * Called when a marker is clicked.
+         *
+         * @param view     The circular view that the marker belongs to
+         * @param marker   The marker that was clicked.
+         * @param position The position of the marker in the adapter
+         */
+        public void onMarkerClick(CircularView view, Marker marker, int position);
     }
 
     /**
@@ -635,10 +651,11 @@ public class CircularView extends View {
         /**
          * Called when the highlight animation ends. This is <b>not</b> called when the animation is canceled.
          *
-         * @param view               The circular view that the object belongs to.
-         * @param circularViewObject The circular view object that the animation ended on.
+         * @param view     The circular view that the marker belongs to.
+         * @param marker   The circular view object that the animation ended on.
+         * @param position The position of the marker in the adapter.
          */
-        public void onHighlightAnimationEnd(CircularView view, CircularViewObject circularViewObject);
+        public void onHighlightAnimationEnd(CircularView view, Marker marker, int position);
     }
 
     /**
