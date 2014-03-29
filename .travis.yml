@@ -11,3 +11,7 @@ before_install:
   - source ~/.android-sdk-installer/env
 
 script: ./gradlew clean build uploadArchives
+
+env:
+  global:
+    secure: PwTRTcoTXxyhaplFzvQMHUm5nFh7Ch7gdY50J2zV9SbVesrQaBSpmpVVXp0F/9itww8sSS3FziLfGhzs30PjSUFkQus9gIRGroSAC5bjtj6zhQUBsOoMo2ShOTsPu52svalJIov5eBvibo54vmEZDyaXh3EXYhX6BpNQraxJbhw=
