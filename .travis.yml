@@ -11,7 +11,7 @@ before_install:
   - source ~/.android-sdk-installer/env
 
 after_success:
-	- initiate-publish.sh
+  - initiate-publish.sh
 
 env:
   global:
