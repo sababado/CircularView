@@ -10,8 +10,6 @@ before_install:
   - curl -L https://raw.github.com/embarkmobile/android-sdk-installer/version-1/android-sdk-installer | bash /dev/stdin --install=$COMPONENTS
   - source ~/.android-sdk-installer/env
 
-script: ./gradlew clean lib:build
-
 after_success:
   - bash initiate-publish.sh
 
