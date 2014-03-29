@@ -8,7 +8,7 @@ android {
         minSdkVersion project.ext['minSdkVersion']
         targetSdkVersion project.ext['targetSdkVersion']
         versionCode 903
-        versionName "0.9.3"
+        versionName "${VERSION_NAME}"
     }
 
     compileOptions {
