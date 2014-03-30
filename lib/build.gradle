@@ -7,7 +7,7 @@ android {
     defaultConfig {
         minSdkVersion project.ext['minSdkVersion']
         targetSdkVersion project.ext['targetSdkVersion']
-        versionCode 903
+        versionCode 904
         versionName "${VERSION_NAME}"
     }
 
