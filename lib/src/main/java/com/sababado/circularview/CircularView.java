@@ -11,8 +11,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -24,7 +26,6 @@ import java.util.ArrayList;
 public class CircularView extends View {
     private static final String TAG = CircularView.class.getSimpleName();
     private String mText; //TODO add customization for the text (style, color, etc)
-    private float mExampleDimension = 0; // TODO: use a default from R.dimen...
 
     private TextPaint mTextPaint;
     private float mTextWidth;
@@ -88,17 +89,23 @@ public class CircularView extends View {
         // Load attributes
         final TypedArray a = getContext().obtainStyledAttributes(
                 attrs, R.styleable.CircularView, defStyle, 0);
-
-        mText = a.getString(
-                R.styleable.CircularView_text);
         final int centerBackgroundColor = a.getColor(
                 R.styleable.CircularView_centerBackgroundColor,
                 CircularViewObject.NO_COLOR);
-        // Use getDimensionPixelSize or getDimensionPixelOffset when dealing with
-        // values that should fall on pixel boundaries.
-        mExampleDimension = a.getDimension(
-                R.styleable.CircularView_exampleDimension,
-                mExampleDimension);
+
+        // Set up a default TextPaint object
+        mTextPaint = new TextPaint();
+        mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
+        mTextPaint.setTextAlign(Paint.Align.LEFT);
+
+        mText = a.getString(R.styleable.CircularView_text);
+        mTextPaint.setTextSize(a.getDimension(
+                R.styleable.CircularView_textSize,
+                24f));
+        mTextPaint.setColor(a.getColor(
+                R.styleable.CircularView_textColor,
+                mTextPaint.getColor()));
+
 
         Drawable circleDrawable = null;
         if (a.hasValue(R.styleable.CircularView_centerDrawable)) {
@@ -113,11 +120,6 @@ public class CircularView extends View {
         mHighlightedDegreeObjectAnimator.setTarget(CircularView.this);
         mHighlightedDegreeObjectAnimator.setPropertyName("highlightedDegree");
         mHighlightedDegreeObjectAnimator.addListener(mAnimatorListener);
-
-        // Set up a default TextPaint object
-        mTextPaint = new TextPaint();
-        mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-        mTextPaint.setTextAlign(Paint.Align.LEFT);
 
         // Update TextPaint and text measurements from attributes
         invalidateTextPaintAndMeasurements();
@@ -237,10 +239,7 @@ public class CircularView extends View {
     }
 
     private void invalidateTextPaintAndMeasurements() {
-        mTextPaint.setTextSize(mExampleDimension);
-//        mTextWidth = mTextPaint.measureText(mText);
-        mTextWidth = mTextPaint.measureText(String.valueOf(mHighlightedDegree));
-
+        mTextWidth = mTextPaint.measureText(mText);
         Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
         mTextHeight = fontMetrics.bottom;
     }
@@ -281,8 +280,8 @@ public class CircularView extends View {
 
 
         // Draw the text.
-        if (mIsAnimating) {
-            canvas.drawText(String.valueOf(mHighlightedDegree),
+        if (!TextUtils.isEmpty(mText)) {
+            canvas.drawText(mText,
                     mCircle.getX() - mTextWidth / 2f,
                     mCircle.getY() - mTextHeight / 2f,
 //                paddingLeft + (contentWidth - mTextWidth) / 2,
@@ -337,22 +336,86 @@ public class CircularView extends View {
      * Gets the example dimension attribute value.
      *
      * @return The example dimension attribute value.
+     * @attr ref R.styleable#Circular_textSize
      */
-    public float getExampleDimension() {
-        return mExampleDimension;
+    public float getTextSize() {
+        return mTextPaint.getTextSize();
     }
 
     /**
-     * Sets the view's example dimension attribute value. In the example view, this dimension
-     * is the font size.
+     * Set the default text size to the given value, interpreted as "scaled
+     * pixel" units.  This size is adjusted based on the current density and
+     * user font size preference.
      *
-     * @param exampleDimension The example dimension attribute value to use.
+     * @param size The scaled pixel size.
+     * @attr ref R.styleable#Circular_textSize
      */
-    public void setExampleDimension(float exampleDimension) {
-        mExampleDimension = exampleDimension;
-        invalidateTextPaintAndMeasurements();
+    public void setTextSize(float size) {
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
     }
 
+    /**
+     * Set the default text size to a given unit and value.  See {@link
+     * TypedValue} for the possible dimension units.
+     *
+     * @param unit The desired dimension unit.
+     * @param size The desired size in the given units.
+     * @attr ref R.styleable#Circular_textSize
+     */
+    public void setTextSize(int unit, float size) {
+        Context c = getContext();
+        Resources r;
+
+        if (c == null)
+            r = Resources.getSystem();
+        else
+            r = c.getResources();
+
+        setRawTextSize(TypedValue.applyDimension(
+                unit, size, r.getDisplayMetrics()));
+    }
+
+    private void setRawTextSize(float size) {
+        if (size != mTextPaint.getTextSize()) {
+            mTextPaint.setTextSize(size);
+            invalidateTextPaintAndMeasurements();
+            invalidate();
+        }
+    }
+
+    /**
+     * Set the paint's color. Note that the color is an int containing alpha
+     * as well as r,g,b. This 32bit value is not premultiplied, meaning that
+     * its alpha can be any value, regardless of the values of r,g,b.
+     * See the Color class for more details.
+     *
+     * @param color The new color (including alpha) to set for the text.
+     */
+    public void setTextColor(int color) {
+        if(mTextPaint.getColor() != color) {
+            mTextPaint.setColor(color);
+            invalidate();
+        }
+    }
+
+    /**
+     * /**
+     * Return the paint's color. Note that the color is a 32bit value
+     * containing alpha as well as r,g,b. This 32bit value is not premultiplied,
+     * meaning that its alpha can be any value, regardless of the values of
+     * r,g,b. See the Color class for more details.
+     *
+     * @return the text's color (and alpha).
+     */
+    public int getTextColor() {
+        return mTextPaint.getColor();
+    }
+
+    /**
+     * Get the degree that is currently highlighted.
+     *
+     * @return The highlighted degree
+     */
     public float getHighlightedDegree() {
         return mHighlightedDegree;
     }

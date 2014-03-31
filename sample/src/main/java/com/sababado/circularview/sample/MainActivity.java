@@ -1,6 +1,7 @@
 package com.sababado.circularview.sample;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -50,6 +51,8 @@ public class MainActivity extends Activity {
             public void onMarkerClick(CircularView view, Marker marker, int position) {
                 Toast.makeText(MainActivity.this, "Clicked " + marker.getId(), Toast.LENGTH_SHORT).show();
                 marker.setVisibility(marker.getVisibility() == View.INVISIBLE || marker.getVisibility() == View.GONE ? View.VISIBLE : View.INVISIBLE);
+                circularView.setTextSize(24+position);
+                circularView.setTextColor(Color.BLACK);
             }
         });
 
@@ -58,6 +61,7 @@ public class MainActivity extends Activity {
             public void onHighlightAnimationEnd(CircularView view, Marker marker, int position) {
                 Toast.makeText(MainActivity.this, "Spin ends on " + marker.getId(), Toast.LENGTH_SHORT).show();
                 marker.setVisibility(marker.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+                circularView.setTextColor(Color.BLUE);
             }
         });
     }

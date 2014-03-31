@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CircularView">
+        <!-- The text that will appear in the center of the view. -->
         <attr name="text" format="string" />
-        <attr name="exampleDimension" format="dimension" />
+        <!-- The size of the text that appears in the center of the view. -->
+        <attr name="textSize" format="dimension" />
+        <!-- The color of the text that appears in the center of the view. -->
+        <attr name="textColor" format="color" />
         <attr name="centerBackgroundColor" format="color" />
         <attr name="centerDrawable" format="reference" />
         <attr name="markerStartingPoint" format="enum">
