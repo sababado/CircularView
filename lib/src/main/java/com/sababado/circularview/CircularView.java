@@ -213,11 +213,12 @@ public class CircularView extends View {
                         normalizeDegree(sectionMin + degreeInterval) - 0.001f,
                         mAdapterDataSetObserver);
                 newMarker.setShouldAnimateWhenHighlighted(mAnimateMarkersOnStillHighlight);
-                // Make sure it's drawable has the callback set
-                newMarker.setCallback(this);
 
                 // get the new marker view.
                 mAdapter.setupMarker(position, newMarker);
+
+                // Make sure it's drawable has the callback set
+                newMarker.setCallback(this);
 
                 degree += degreeInterval;
             }
