@@ -114,8 +114,6 @@ public class CircularView extends View {
             circleDrawable.setCallback(this);
         }
 
-        a.recycle();
-
         mHighlightedDegreeObjectAnimator = new ObjectAnimator();
         mHighlightedDegreeObjectAnimator.setTarget(CircularView.this);
         mHighlightedDegreeObjectAnimator.setPropertyName("highlightedDegree");
@@ -129,7 +127,7 @@ public class CircularView extends View {
         mCirclePaint.setStyle(Paint.Style.FILL);
         mCirclePaint.setColor(Color.RED);
 
-        mDrawHighlightedMarkerOnTop = false;
+        mDrawHighlightedMarkerOnTop = a.getBoolean(R.styleable.CircularView_drawHighlightedMarkerOnTop, false);
         mHighlightedMarker = null;
         mHighlightedMarkerPosition = -1;
         mHighlightedDegree = HIGHLIGHT_NONE;
@@ -139,6 +137,8 @@ public class CircularView extends View {
 
         mCircle = new CircularViewObject(getContext(), CIRCLE_TO_MARKER_PADDING, centerBackgroundColor);
         mCircle.setSrc(circleDrawable);
+
+        a.recycle();
     }
 
     @Override
@@ -336,7 +336,7 @@ public class CircularView extends View {
      * Gets the example dimension attribute value.
      *
      * @return The example dimension attribute value.
-     * @attr ref R.styleable#Circular_textSize
+     * @attr ref R.styleable#CircularView_textSize
      */
     public float getTextSize() {
         return mTextPaint.getTextSize();
@@ -348,7 +348,7 @@ public class CircularView extends View {
      * user font size preference.
      *
      * @param size The scaled pixel size.
-     * @attr ref R.styleable#Circular_textSize
+     * @attr ref R.styleable#CircularView_textSize
      */
     public void setTextSize(float size) {
         setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
@@ -360,7 +360,7 @@ public class CircularView extends View {
      *
      * @param unit The desired dimension unit.
      * @param size The desired size in the given units.
-     * @attr ref R.styleable#Circular_textSize
+     * @attr ref R.styleable#CircularView_textSize
      */
     public void setTextSize(int unit, float size) {
         Context c = getContext();
@@ -392,7 +392,7 @@ public class CircularView extends View {
      * @param color The new color (including alpha) to set for the text.
      */
     public void setTextColor(int color) {
-        if(mTextPaint.getColor() != color) {
+        if (mTextPaint.getColor() != color) {
             mTextPaint.setColor(color);
             invalidate();
         }
@@ -508,6 +508,7 @@ public class CircularView extends View {
      * Returns the flag the determines if the highlighted marker will draw on top of other markers.
      *
      * @return True if the highlighted marker will draw on top of other markers, false if they're all drawn in order.
+     * @attr ref R.styleable#CircularView_drawHighlightedMarkerOnTop
      */
     public boolean isDrawHighlightedMarkerOnTop() {
         return mDrawHighlightedMarkerOnTop;
@@ -518,6 +519,7 @@ public class CircularView extends View {
      * This is false by default.
      *
      * @param drawHighlightedMarkerOnTop the flag that determines if the highlighted marker will draw on top of other markers.
+     * @attr ref R.styleable#CircularView_drawHighlightedMarkerOnTop
      */
     public void setDrawHighlightedMarkerOnTop(boolean drawHighlightedMarkerOnTop) {
         this.mDrawHighlightedMarkerOnTop = drawHighlightedMarkerOnTop;
@@ -655,6 +657,7 @@ public class CircularView extends View {
      */
     public void setMarkerStartingPoint(final float startingPoint) {
         mMarkerStartingPoint = startingPoint;
+        requestLayout();
     }
 
     @Override
