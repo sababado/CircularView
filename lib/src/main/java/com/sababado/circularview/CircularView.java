@@ -371,20 +371,23 @@ public class CircularView extends View {
         // Loop through all markers to see if any of them are highlighted.
         if (mMarkerList != null) {
             final int size = mMarkerList.size();
-            for (int i=0; i<size; i++) {
+            for (int i = 0; i < size; i++) {
                 final Marker marker = mMarkerList.get(i);
-                final boolean markerIsHighlighted = mHighlightedDegree != HIGHLIGHT_NONE && marker.hasInSection(mHighlightedDegree % 360);
-                marker.setHighlighted(markerIsHighlighted);
-                if (markerIsHighlighted) {
-                    // Marker is highlighted!
-                    mHighlightedMarker = marker;
-                    mHighlightedMarkerPosition = i;
-                    final boolean highlightAnimationAndAnimateMarker = mIsAnimating && mAnimateMarkersOnHighlightAnimation;
-                    final boolean stillAndAnimateMarker = !mIsAnimating && mAnimateMarkersOnStillHighlight;
-                    final boolean wantsToAnimateMarker = highlightAnimationAndAnimateMarker || stillAndAnimateMarker;
-                    // Animate only if necessary
-                    if (wantsToAnimateMarker && !marker.isAnimating()) {
-                        marker.animateBounce();
+                // Only check the marker if the visibility is not "gone"
+                if (marker.getVisibility() != View.GONE) {
+                    final boolean markerIsHighlighted = mHighlightedDegree != HIGHLIGHT_NONE && marker.hasInSection(mHighlightedDegree % 360);
+                    marker.setHighlighted(markerIsHighlighted);
+                    if (markerIsHighlighted) {
+                        // Marker is highlighted!
+                        mHighlightedMarker = marker;
+                        mHighlightedMarkerPosition = i;
+                        final boolean highlightAnimationAndAnimateMarker = mIsAnimating && mAnimateMarkersOnHighlightAnimation;
+                        final boolean stillAndAnimateMarker = !mIsAnimating && mAnimateMarkersOnStillHighlight;
+                        final boolean wantsToAnimateMarker = highlightAnimationAndAnimateMarker || stillAndAnimateMarker;
+                        // Animate only if necessary
+                        if (wantsToAnimateMarker && !marker.isAnimating()) {
+                            marker.animateBounce();
+                        }
                     }
                 }
                 // Continue looping through the rest to reset other markers.

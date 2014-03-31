@@ -49,6 +49,7 @@ public class MainActivity extends Activity {
 
             public void onMarkerClick(CircularView view, Marker marker, int position) {
                 Toast.makeText(MainActivity.this, "Clicked " + marker.getId(), Toast.LENGTH_SHORT).show();
+                marker.setVisibility(marker.getVisibility() == View.INVISIBLE || marker.getVisibility() == View.GONE ? View.VISIBLE : View.INVISIBLE);
             }
         });
 
@@ -56,6 +57,7 @@ public class MainActivity extends Activity {
             @Override
             public void onHighlightAnimationEnd(CircularView view, Marker marker, int position) {
                 Toast.makeText(MainActivity.this, "Spin ends on " + marker.getId(), Toast.LENGTH_SHORT).show();
+                marker.setVisibility(marker.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
             }
         });
     }

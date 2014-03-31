@@ -28,10 +28,10 @@ public class CircularViewObject {
     static final int VIEW_STATE_PRESSED = 1 << 4;
 
     static final int[] VIEW_STATE_IDS = new int[]{
-            0,0,
+            0, 0,
             android.R.attr.state_selected, VIEW_STATE_SELECTED,
             android.R.attr.state_focused, VIEW_STATE_FOCUSED,
-            0,0,
+            0, 0,
             android.R.attr.state_pressed, VIEW_STATE_PRESSED
     };
 
@@ -65,6 +65,7 @@ public class CircularViewObject {
     private Drawable drawable;
     private CircularView.AdapterDataSetObserver mAdapterDataSetObserver;
     private boolean fitToCircle;
+    private int visibility;
 
     /**
      * Use this value to make sure that no color shows.
@@ -84,6 +85,7 @@ public class CircularViewObject {
         paint.setColor(NO_COLOR);
         setRadiusPadding(5f);
         fitToCircle = false;
+        visibility = View.VISIBLE;
     }
 
     CircularViewObject(final Context context, final float radiusPadding, final int centerBackgroundColor) {
@@ -100,28 +102,30 @@ public class CircularViewObject {
     }
 
     protected void draw(final Canvas canvas) {
-        if (paint.getColor() != NO_COLOR) {
-            canvas.drawCircle(x, y, radius, paint);
-        }
-        if (drawable != null) {
-            float leftOffset = -radius + radiusPadding;
-            float topOffset = -radius + radiusPadding;
-            float rightOffset = radius - radiusPadding;
-            float bottomOffset = radius - radiusPadding;
-            if (fitToCircle) {
-                final double extraOffset = distanceFromCenter(x + leftOffset, y + topOffset) - radius;
-                leftOffset += extraOffset;
-                topOffset += extraOffset;
-                rightOffset -= extraOffset;
-                bottomOffset -= extraOffset;
+        if (visibility == View.VISIBLE) {
+            if (paint.getColor() != NO_COLOR) {
+                canvas.drawCircle(x, y, radius, paint);
             }
-            drawable.setBounds(
-                    (int) (x + leftOffset),
-                    (int) (y + topOffset),
-                    (int) (x + rightOffset),
-                    (int) (y + bottomOffset)
-            );
-            drawable.draw(canvas);
+            if (drawable != null) {
+                float leftOffset = -radius + radiusPadding;
+                float topOffset = -radius + radiusPadding;
+                float rightOffset = radius - radiusPadding;
+                float bottomOffset = radius - radiusPadding;
+                if (fitToCircle) {
+                    final double extraOffset = distanceFromCenter(x + leftOffset, y + topOffset) - radius;
+                    leftOffset += extraOffset;
+                    topOffset += extraOffset;
+                    rightOffset -= extraOffset;
+                    bottomOffset -= extraOffset;
+                }
+                drawable.setBounds(
+                        (int) (x + leftOffset),
+                        (int) (y + topOffset),
+                        (int) (x + rightOffset),
+                        (int) (y + bottomOffset)
+                );
+                drawable.draw(canvas);
+            }
         }
     }
 
@@ -216,17 +220,18 @@ public class CircularViewObject {
 
     /**
      * Either remove or add a state to the combined state.
+     *
      * @param state State to add or remove.
-     * @param flag True to add, false to remove.
+     * @param flag  True to add, false to remove.
      */
     public void updateDrawableState(int state, boolean flag) {
         final int oldState = mCombinedState;
         // Update the combined state flag
-        if(flag) mCombinedState |= state;
+        if (flag) mCombinedState |= state;
         else mCombinedState &= ~state;
 
         // Set the combined state
-        if(oldState != mCombinedState) {
+        if (oldState != mCombinedState) {
             setState(VIEW_STATE_SETS[mCombinedState]);
         }
     }
@@ -363,6 +368,35 @@ public class CircularViewObject {
     }
 
     /**
+     * Returns the visibility status for this view.
+     *
+     * @return One of {@link View#VISIBLE}, {@link View#INVISIBLE}, or {@link View#GONE}.
+     */
+    public int getVisibility() {
+        return visibility;
+    }
+
+    /**
+     * Set the enabled state of this view.
+     *
+     * @param visibility One of {@link View#VISIBLE}, {@link View#INVISIBLE}, or {@link View#GONE}.
+     */
+    public void setVisibility(int visibility) {
+        if (this.visibility != visibility) {
+            final boolean hasSpace = this.visibility == View.VISIBLE || this.visibility == View.INVISIBLE;
+            final boolean removingSpace = visibility == View.GONE;
+            final boolean change = hasSpace && removingSpace;
+            this.visibility = visibility;
+            // Only change the dataset if it is absolutely necessary
+            if (change && mAdapterDataSetObserver != null) {
+                mAdapterDataSetObserver.onChanged();
+            } else {
+                invalidate();
+            }
+        }
+    }
+
+    /**
      * Act on a touch event. Returns a status based on what action was taken.
      *
      * @param event The motion event that was just received.
@@ -370,25 +404,27 @@ public class CircularViewObject {
      */
     public int onTouchEvent(final MotionEvent event) {
         int status = -2;
-        final int action = event.getAction();
+        if (visibility != View.GONE) {
+            final int action = event.getAction();
 
-        final boolean isEventInCenterCircle = isInCenterCircle(event.getX(), event.getY());
-        if (action == MotionEvent.ACTION_DOWN) {
-            // check if center
-            if (isEventInCenterCircle) {
-                updateDrawableState(VIEW_STATE_PRESSED, true);
-                status = MotionEvent.ACTION_DOWN;
-            }
-        } else if (action == MotionEvent.ACTION_UP) {
-            final boolean isPressed = (mCombinedState & VIEW_STATE_PRESSED) != 0;
-            if (isPressed && isEventInCenterCircle) {
-                updateDrawableState(VIEW_STATE_PRESSED, false);
-                status = MotionEvent.ACTION_UP;
-            }
+            final boolean isEventInCenterCircle = isInCenterCircle(event.getX(), event.getY());
+            if (action == MotionEvent.ACTION_DOWN) {
+                // check if center
+                if (isEventInCenterCircle) {
+                    updateDrawableState(VIEW_STATE_PRESSED, true);
+                    status = MotionEvent.ACTION_DOWN;
+                }
+            } else if (action == MotionEvent.ACTION_UP) {
+                final boolean isPressed = (mCombinedState & VIEW_STATE_PRESSED) != 0;
+                if (isPressed && isEventInCenterCircle) {
+                    updateDrawableState(VIEW_STATE_PRESSED, false);
+                    status = MotionEvent.ACTION_UP;
+                }
 
-        } else if (action == MotionEvent.ACTION_MOVE) {
-            if (!isEventInCenterCircle) {
-                updateDrawableState(VIEW_STATE_PRESSED, false);
+            } else if (action == MotionEvent.ACTION_MOVE) {
+                if (!isEventInCenterCircle) {
+                    updateDrawableState(VIEW_STATE_PRESSED, false);
+                }
             }
         }
         return status;
@@ -408,26 +444,31 @@ public class CircularViewObject {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        CircularViewObject that = (CircularViewObject) o;
+        CircularViewObject object = (CircularViewObject) o;
 
-        if (id != that.id) return false;
-        if (Float.compare(that.radius, radius) != 0) return false;
-        if (Float.compare(that.radiusPadding, radiusPadding) != 0) return false;
-        if (Float.compare(that.x, x) != 0) return false;
-        if (Float.compare(that.y, y) != 0) return false;
-        if (context != null ? !context.equals(that.context) : that.context != null) return false;
-        if (drawable != null ? !drawable.equals(that.drawable) : that.drawable != null)
+        if (fitToCircle != object.fitToCircle) return false;
+        if (id != object.id) return false;
+        if (mCombinedState != object.mCombinedState) return false;
+        if (Float.compare(object.radius, radius) != 0) return false;
+        if (Float.compare(object.radiusPadding, radiusPadding) != 0) return false;
+        if (visibility != object.visibility) return false;
+        if (Float.compare(object.x, x) != 0) return false;
+        if (Float.compare(object.y, y) != 0) return false;
+        if (context != null ? !context.equals(object.context) : object.context != null)
             return false;
-        if (mAdapterDataSetObserver != null ? !mAdapterDataSetObserver.equals(that.mAdapterDataSetObserver) : that.mAdapterDataSetObserver != null)
+        if (drawable != null ? !drawable.equals(object.drawable) : object.drawable != null)
             return false;
-        if (paint != null ? !paint.equals(that.paint) : that.paint != null) return false;
+        if (mAdapterDataSetObserver != null ? !mAdapterDataSetObserver.equals(object.mAdapterDataSetObserver) : object.mAdapterDataSetObserver != null)
+            return false;
+        if (paint != null ? !paint.equals(object.paint) : object.paint != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = id;
+        int result = mCombinedState;
+        result = 31 * result + id;
         result = 31 * result + (radius != +0.0f ? Float.floatToIntBits(radius) : 0);
         result = 31 * result + (radiusPadding != +0.0f ? Float.floatToIntBits(radiusPadding) : 0);
         result = 31 * result + (x != +0.0f ? Float.floatToIntBits(x) : 0);
@@ -436,13 +477,16 @@ public class CircularViewObject {
         result = 31 * result + (context != null ? context.hashCode() : 0);
         result = 31 * result + (drawable != null ? drawable.hashCode() : 0);
         result = 31 * result + (mAdapterDataSetObserver != null ? mAdapterDataSetObserver.hashCode() : 0);
+        result = 31 * result + (fitToCircle ? 1 : 0);
+        result = 31 * result + visibility;
         return result;
     }
 
     @Override
     public String toString() {
         return "CircularViewObject{" +
-                "id=" + id +
+                "mCombinedState=" + mCombinedState +
+                ", id=" + id +
                 ", radius=" + radius +
                 ", radiusPadding=" + radiusPadding +
                 ", x=" + x +
@@ -451,6 +495,8 @@ public class CircularViewObject {
                 ", context=" + context +
                 ", drawable=" + drawable +
                 ", mAdapterDataSetObserver=" + mAdapterDataSetObserver +
+                ", fitToCircle=" + fitToCircle +
+                ", visibility=" + visibility +
                 '}';
     }
 }
