@@ -9,6 +9,14 @@ A custom view for Android. It consists of a larger center circle that it surroun
 ![Quick example screenshot](http://s27.postimg.org/a9nzujq8z/Circular_View_example.png)
 
 ##Usage
+
+The library can be referenced from maven central.
+
+Gradle
+```Groovy
+compile 'com.sababado.circularview:library:0.9.+'
+```
+
 The `CircularView` can be definied in a XML layout or in code. 
 
 ##Quick Setup
