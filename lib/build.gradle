@@ -7,8 +7,8 @@ android {
     defaultConfig {
         minSdkVersion project.ext['minSdkVersion']
         targetSdkVersion project.ext['targetSdkVersion']
-        versionCode 904
-        versionName "${VERSION_NAME}"
+        versionCode Integer.parseInt(project.VERSION_CODE)
+        versionName "${project.VERSION_NAME}"
     }
 
     compileOptions {

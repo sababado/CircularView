@@ -15,6 +15,9 @@ allprojects {
     project.ext['minSdkVersion'] = 16
     project.ext['targetSdkVersion'] = 19
 
+    version = VERSION_NAME
+    group = GROUP
+
     repositories {
         mavenCentral()
     }
