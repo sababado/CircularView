@@ -9,9 +9,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.sababado.circularview.CircularView;
-import com.sababado.circularview.CircularViewObject;
-import com.sababado.circularview.SimpleCircularViewAdapter;
 import com.sababado.circularview.Marker;
+import com.sababado.circularview.SimpleCircularViewAdapter;
 
 
 public class MainActivity extends Activity {
@@ -34,7 +33,7 @@ public class MainActivity extends Activity {
         circularView.setAnimateMarkerOnStillHighlight(true);
         // Combine the above line with the following so that the marker at it's position will animate at the start.
         // The highlighted Degree can also be defined in XML
-        circularView.setHighlightedDegree(circularView.BOTTOM);
+        circularView.setHighlightedDegree(CircularView.BOTTOM);
 
         circularView.setOnCircularViewObjectClickListener(new CircularView.OnClickListener() {
             @Override

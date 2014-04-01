@@ -13,7 +13,6 @@ import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -34,7 +33,7 @@ public class CircularView extends View {
     private Paint mCirclePaint;
     private static final float CIRCLE_WEIGHT_LONG_ORIENTATION = 0.8f;
     private static final float CIRCLE_TO_MARKER_PADDING = 20f;
-    private float mMarkerRadius = 40;
+    private final float DEFAULT_MARKER_RADIUS = 40;
     private float mMarkerStartingPoint;
 
     private BaseCircularViewAdapter mAdapter;
@@ -149,7 +148,7 @@ public class CircularView extends View {
         final int shortDimension = Math.min(
                 mHeight = getMeasuredHeight(),
                 mWidth = getMeasuredWidth());
-        final float circleRadius = (shortDimension * CIRCLE_WEIGHT_LONG_ORIENTATION - mMarkerRadius * 4f - CIRCLE_TO_MARKER_PADDING * 2f) / 2f;
+        final float circleRadius = (shortDimension * CIRCLE_WEIGHT_LONG_ORIENTATION - DEFAULT_MARKER_RADIUS * 4f - CIRCLE_TO_MARKER_PADDING * 2f) / 2f;
         final float circleCenter = shortDimension / 2f;
         mCircle.init(circleCenter, circleCenter, circleRadius, mAdapterDataSetObserver);
     }
@@ -183,11 +182,11 @@ public class CircularView extends View {
             final int markerCount = mAdapter.getCount();
             assert (markerCount >= 0);
             if (mMarkerList == null) {
-                mMarkerList = new ArrayList(markerCount);
+                mMarkerList = new ArrayList<>(markerCount);
             }
             int markerViewListSize = mMarkerList.size();
             final float degreeInterval = 360.0f / markerCount;
-            final float radiusFromCenter = mCircle.getRadius() + CIRCLE_TO_MARKER_PADDING + mMarkerRadius;
+            final float radiusFromCenter = mCircle.getRadius() + CIRCLE_TO_MARKER_PADDING + DEFAULT_MARKER_RADIUS;
             int position = 0;
             float degree = mMarkerStartingPoint;
             // loop clockwise
@@ -210,7 +209,7 @@ public class CircularView extends View {
                 newMarker.init(
                         (float) (radiusFromCenter * Math.cos(rad)) + mCircle.getX(),
                         (float) (radiusFromCenter * Math.sin(rad)) + mCircle.getY(),
-                        mMarkerRadius,
+                        DEFAULT_MARKER_RADIUS,
                         normalizeDegree(sectionMin),
                         normalizeDegree(sectionMin + degreeInterval) - 0.001f,
                         mAdapterDataSetObserver);
@@ -279,7 +278,7 @@ public class CircularView extends View {
 
         // Draw line
         if (mIsAnimating) {
-            final float radiusFromCenter = mCircle.getRadius() + CIRCLE_TO_MARKER_PADDING + mMarkerRadius;
+            final float radiusFromCenter = mCircle.getRadius() + CIRCLE_TO_MARKER_PADDING + DEFAULT_MARKER_RADIUS;
             final float x = (float) Math.cos(Math.toRadians(mHighlightedDegree)) * radiusFromCenter + mCircle.getX();
             final float y = (float) Math.sin(Math.toRadians(mHighlightedDegree)) * radiusFromCenter + mCircle.getY();
             canvas.drawLine(mCircle.getX(), mCircle.getY(), x, y, mCirclePaint);
@@ -313,7 +312,7 @@ public class CircularView extends View {
     /**
      * Get the adapter that has been set on this view.
      *
-     * @return
+     * @return The adapter that has been set on this view.
      * @see #setAdapter(BaseCircularViewAdapter)
      */
     public BaseCircularViewAdapter getAdapter() {
@@ -324,6 +323,7 @@ public class CircularView extends View {
      * Gets the text for this view.
      *
      * @return The text for this view.
+     * @attr ref R.styleable#CircularView_text
      */
     public String getText() {
         return mText;
@@ -333,6 +333,7 @@ public class CircularView extends View {
      * Sets the view's text.
      *
      * @param text The view's text.
+     * @attr ref R.styleable#CircularView_text
      */
     public void setText(String text) {
         mText = text;
@@ -397,6 +398,7 @@ public class CircularView extends View {
      * See the Color class for more details.
      *
      * @param color The new color (including alpha) to set for the text.
+     * @attr ref R.styleable#CircularView_textColor
      */
     public void setTextColor(int color) {
         if (mTextPaint.getColor() != color) {
@@ -413,6 +415,7 @@ public class CircularView extends View {
      * r,g,b. See the Color class for more details.
      *
      * @return the text's color (and alpha).
+     * @attr ref R.styleable#CircularView_textColor
      */
     public int getTextColor() {
         return mTextPaint.getColor();
@@ -622,7 +625,7 @@ public class CircularView extends View {
     }
 
     private boolean mAnimationWasCanceled = false;
-    private Animator.AnimatorListener mAnimatorListener = new Animator.AnimatorListener() {
+    private final Animator.AnimatorListener mAnimatorListener = new Animator.AnimatorListener() {
         @Override
         public void onAnimationStart(Animator animation) {
         }
@@ -738,19 +741,5 @@ public class CircularView extends View {
          * @param position The position of the marker in the adapter.
          */
         public void onHighlightAnimationEnd(CircularView view, Marker marker, int position);
-    }
-
-    /**
-     * This method converts device specific pixels to density independent pixels.
-     *
-     * @param px      A value in px (pixels) unit. Which we need to convert into db
-     * @param context Context to get resources and device specific display metrics
-     * @return A float value to represent dp equivalent to px value
-     */
-    public static float convertPixelsToDp(float px, Context context) {
-        Resources resources = context.getResources();
-        DisplayMetrics metrics = resources.getDisplayMetrics();
-        float dp = px / (metrics.densityDpi / 160f);
-        return dp;
     }
 }

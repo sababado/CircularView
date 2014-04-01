@@ -17,7 +17,7 @@ Gradle
 compile 'com.sababado.circularview:library:0.9.+'
 ```
 
-The `CircularView` can be definied in a XML layout or in code. 
+The `CircularView` can be defined in a XML layout or in code.
 
 ##Quick Setup
 ###Adding the view to a layout
@@ -47,7 +47,7 @@ public class MySimpleCircularViewAdapter extends SimpleCircularViewAdapter {
 
     @Override
     public void setupMarker(final int position, final Marker marker) {
-        // Setup and customize markers here. This is called everytime a marker is to be displayed.
+        // Setup and customize markers here. This is called every time a marker is to be displayed.
         // 0 >= position > getCount()
         // The marker is intended to be reused. It will never be null.
         marker.setSrc(R.drawable.ic_launcher);
@@ -101,7 +101,7 @@ circularView.setOnHighlightAnimationEndListener(new CircularView.OnHighlightAnim
 The `CircularView` can trigger the bounce animation when `animateHighlightedDegree(start, end, duration)` is called. The bounce animation can be turned off by calling the same method with an additional flag.
 For example:
 ```JAVA
-`animateHighlightedDegree(start, end, duration, shouldAnimateMarkers)`
+animateHighlightedDegree(start, end, duration, shouldAnimateMarkers)
 ```
 
 In addition there is control over if a marker should bounce while it is highlighted and while the highlighted degree value is constant (aka not animating).

@@ -55,13 +55,13 @@ public class CircularViewObject {
 
     private int mCombinedState;
     private static final AtomicInteger sAtomicIdCounter = new AtomicInteger(0);
-    private int id;
+    private final int id;
     protected float radius;
     protected float radiusPadding;
     protected float x;
     protected float y;
-    private Paint paint;
-    private Context context;
+    private final Paint paint;
+    private final Context context;
     private Drawable drawable;
     private CircularView.AdapterDataSetObserver mAdapterDataSetObserver;
     private boolean fitToCircle;

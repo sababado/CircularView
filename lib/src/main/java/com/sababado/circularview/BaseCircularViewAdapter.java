@@ -3,7 +3,7 @@ package com.sababado.circularview;
 import android.database.DataSetObserver;
 
 /**
- * Created by Robert on 3/23/2014.
+ * This adapter facilitates access to markers and is used by {@link com.sababado.circularview.CircularView}.
  */
 public interface BaseCircularViewAdapter {
     /**
@@ -23,13 +23,13 @@ public interface BaseCircularViewAdapter {
 
     /**
      * Register an observer on this adapter.
-     * @param observer
+     * @param observer observer to register.
      */
     public void registerDataSetObserver(DataSetObserver observer);
 
     /**
      * Unregister an observer on this adapter.
-     * @param observer
+     * @param observer observer to unregister.
      */
     public void unregisterDataSetObserver(DataSetObserver observer);
 
