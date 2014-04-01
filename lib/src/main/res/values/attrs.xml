@@ -29,6 +29,18 @@
         </attr>
 
         <!-- Flag that determines if the highlighted marker will be drawn on top of others. -->
-        <attr name="drawHighlightedMarkerOnTop" format="boolean"/>
+        <attr name="drawHighlightedMarkerOnTop" format="boolean" />
+
+        <!-- The degree that is highlighted. -->
+        <attr name="highlightedDegree" format="float">
+            <!-- Starting point at the top of the view. -->
+            <enum name="top" value="270" />
+            <!-- Starting point at the bottom of the view. -->
+            <enum name="bottom" value="90" />
+            <!-- Starting point at the left of the view. -->
+            <enum name="left" value="180" />
+            <!-- Starting point at the right of the view. -->
+            <enum name="right" value="0" />
+        </attr>
     </declare-styleable>
 </resources>

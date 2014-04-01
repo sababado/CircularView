@@ -211,7 +211,6 @@ public class CircularViewObject {
         if (drawable != null) {
             appearanceChange = drawable.setState(stateSet);
             if (appearanceChange) {
-//                drawable.invalidateSelf();
                 invalidate();
             }
         }

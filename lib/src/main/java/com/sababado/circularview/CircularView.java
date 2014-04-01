@@ -130,7 +130,7 @@ public class CircularView extends View {
         mDrawHighlightedMarkerOnTop = a.getBoolean(R.styleable.CircularView_drawHighlightedMarkerOnTop, false);
         mHighlightedMarker = null;
         mHighlightedMarkerPosition = -1;
-        mHighlightedDegree = HIGHLIGHT_NONE;
+        mHighlightedDegree = a.getFloat(R.styleable.CircularView_highlightedDegree, HIGHLIGHT_NONE);
         mAnimateMarkersOnStillHighlight = false;
         mAnimateMarkersOnHighlightAnimation = false;
         mIsAnimating = false;
@@ -183,7 +183,6 @@ public class CircularView extends View {
             assert (markerCount >= 0);
             if (mMarkerList == null) {
                 mMarkerList = new ArrayList(markerCount);
-            } else {
             }
             int markerViewListSize = mMarkerList.size();
             final float degreeInterval = 360.0f / markerCount;
@@ -231,12 +230,19 @@ public class CircularView extends View {
                 markerViewListSize--;
             }
             mMarkerList.trimToSize();
-            if (mHighlightedDegree != HIGHLIGHT_NONE) {
-                // Force any effect of highlighting.
-                setHighlightedDegree(mHighlightedDegree);
-            }
+            // Force any effect of highlighting.
         }
+        // Workaround. Setting the state of a drawable immediately doesn't seem to update correctly.
+        // Delaying the action works.
+        postDelayed(setCurrentHighlightedDegree, 5);
     }
+
+    private final Runnable setCurrentHighlightedDegree = new Runnable() {
+        @Override
+        public void run() {
+            setHighlightedDegree(mHighlightedDegree);
+        }
+    };
 
     private void invalidateTextPaintAndMeasurements() {
         mTextWidth = mTextPaint.measureText(mText);
@@ -415,6 +421,7 @@ public class CircularView extends View {
      * Get the degree that is currently highlighted.
      *
      * @return The highlighted degree
+     * @attr ref R.styleable#CircularView_highlightedDegree
      */
     public float getHighlightedDegree() {
         return mHighlightedDegree;
@@ -424,6 +431,7 @@ public class CircularView extends View {
      * Set the degree that will trigger highlighting a marker. You can also set {@link #HIGHLIGHT_NONE} to not highlight any degree.
      *
      * @param highlightedDegree Value in degrees.
+     * @attr ref R.styleable#CircularView_highlightedDegree
      */
     public void setHighlightedDegree(final float highlightedDegree) {
         this.mHighlightedDegree = highlightedDegree;
