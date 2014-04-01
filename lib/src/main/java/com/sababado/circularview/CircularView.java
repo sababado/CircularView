@@ -300,7 +300,7 @@ public class CircularView extends View {
         if (mAdapter != null) {
             mAdapter.registerDataSetObserver(mAdapterDataSetObserver);
         }
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -379,7 +379,7 @@ public class CircularView extends View {
         if (size != mTextPaint.getTextSize()) {
             mTextPaint.setTextSize(size);
             invalidateTextPaintAndMeasurements();
-            invalidate();
+            postInvalidate();
         }
     }
 
@@ -394,7 +394,7 @@ public class CircularView extends View {
     public void setTextColor(int color) {
         if (mTextPaint.getColor() != color) {
             mTextPaint.setColor(color);
-            invalidate();
+            postInvalidate();
         }
     }
 
@@ -427,7 +427,6 @@ public class CircularView extends View {
      */
     public void setHighlightedDegree(final float highlightedDegree) {
         this.mHighlightedDegree = highlightedDegree;
-        invalidateTextPaintAndMeasurements();
 
         mHighlightedMarker = null;
         mHighlightedMarkerPosition = -1;
@@ -456,7 +455,7 @@ public class CircularView extends View {
                 // Continue looping through the rest to reset other markers.
             }
         }
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -483,7 +482,7 @@ public class CircularView extends View {
                 marker.setShouldAnimateWhenHighlighted(animateMarkerOnHighlight);
             }
         }
-        invalidate();
+        postInvalidate();
     }
 
     /**
@@ -689,7 +688,7 @@ public class CircularView extends View {
          */
         @Override
         public void onInvalidated() {
-            invalidate();
+            postInvalidate();
         }
     }
 
