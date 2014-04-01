@@ -30,6 +30,7 @@ public class MainActivity extends Activity {
         circularView.setAdapter(mAdapter);
 
         // Allow markers to continuously animate on their own when the highlight animation isn't running.
+        // The flag can also be set in XML
         circularView.setAnimateMarkerOnStillHighlight(true);
         // Combine the above line with the following so that the marker at it's position will animate at the start.
         // The highlighted Degree can also be defined in XML

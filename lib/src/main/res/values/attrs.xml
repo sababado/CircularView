@@ -42,5 +42,8 @@
             <!-- Starting point at the right of the view. -->
             <enum name="right" value="0" />
         </attr>
+
+        <!-- Flag that determines if markers will animate when the highlight animation is not running. -->
+        <attr name="animateMarkersOnStillHighlight" format="boolean" />
     </declare-styleable>
 </resources>

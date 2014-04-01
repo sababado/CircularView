@@ -131,7 +131,7 @@ public class CircularView extends View {
         mHighlightedMarker = null;
         mHighlightedMarkerPosition = -1;
         mHighlightedDegree = a.getFloat(R.styleable.CircularView_highlightedDegree, HIGHLIGHT_NONE);
-        mAnimateMarkersOnStillHighlight = false;
+        mAnimateMarkersOnStillHighlight = a.getBoolean(R.styleable.CircularView_animateMarkersOnStillHighlight, false);
         mAnimateMarkersOnHighlightAnimation = false;
         mIsAnimating = false;
 
