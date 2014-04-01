@@ -17,7 +17,7 @@
         <attr name="centerDrawable" format="reference" />
 
         <!-- Starting points for where the markers will be drawn. -->
-        <attr name="markerStartingPoint" format="enum">
+        <attr name="markerStartingPoint" format="float">
             <!-- Starting point at the top of the view. -->
             <enum name="top" value="270" />
             <!-- Starting point at the bottom of the view. -->

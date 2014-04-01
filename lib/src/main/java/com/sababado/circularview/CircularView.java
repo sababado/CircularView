@@ -131,6 +131,7 @@ public class CircularView extends View {
         mHighlightedMarker = null;
         mHighlightedMarkerPosition = -1;
         mHighlightedDegree = a.getFloat(R.styleable.CircularView_highlightedDegree, HIGHLIGHT_NONE);
+        mMarkerStartingPoint = a.getFloat(R.styleable.CircularView_markerStartingPoint, 0f);
         mAnimateMarkersOnStillHighlight = a.getBoolean(R.styleable.CircularView_animateMarkersOnStillHighlight, false);
         mAnimateMarkersOnHighlightAnimation = false;
         mIsAnimating = false;
@@ -188,11 +189,11 @@ public class CircularView extends View {
             final float degreeInterval = 360.0f / markerCount;
             final float radiusFromCenter = mCircle.getRadius() + CIRCLE_TO_MARKER_PADDING + mMarkerRadius;
             int position = 0;
-            float degree = 0;
+            float degree = mMarkerStartingPoint;
             // loop clockwise
             for (; position < markerCount; position++) {
                 final boolean positionHasExistingMarkerInList = position < markerViewListSize;
-                final float actualDegree = normalizeDegree(degree + 90f);
+                final float actualDegree = normalizeDegree(degree);
                 final double rad = Math.toRadians(actualDegree);
                 final float sectionMin = actualDegree - degreeInterval / 2f;
 
@@ -472,6 +473,7 @@ public class CircularView extends View {
      *
      * @return True if a marker should animate when it is highlighted, false if not.
      * @see #setHighlightedDegree(float)
+     * @attr ref R.styleable#CircularView_animateMarkersOnStillHighlight
      */
     public boolean isAnimateMarkerOnStillHighlight() {
         return mAnimateMarkersOnStillHighlight;
@@ -482,6 +484,7 @@ public class CircularView extends View {
      * animate continuously when the highlight degree is not animating. This is set to false by default.
      *
      * @param animateMarkerOnHighlight True to continuously animate, false to turn it off.
+     * @attr ref R.styleable#CircularView_animateMarkersOnStillHighlight
      */
     public void setAnimateMarkerOnStillHighlight(boolean animateMarkerOnHighlight) {
         this.mAnimateMarkersOnStillHighlight = animateMarkerOnHighlight;
@@ -652,6 +655,7 @@ public class CircularView extends View {
      * Get the starting point for the markers.
      *
      * @return The starting point for the markers.
+     * @attr ref R.styleable#CircularView_markerStartingPoint
      */
     public float getMarkerStartingPoint() {
         return mMarkerStartingPoint;
@@ -661,6 +665,7 @@ public class CircularView extends View {
      * Set the starting point for the markers
      *
      * @param startingPoint Starting point for the markers
+     * @attr ref R.styleable#CircularView_markerStartingPoint
      */
     public void setMarkerStartingPoint(final float startingPoint) {
         mMarkerStartingPoint = startingPoint;
