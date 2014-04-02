@@ -245,7 +245,7 @@ public class CircularView extends View {
     };
 
     private void invalidateTextPaintAndMeasurements() {
-        mTextWidth = mTextPaint.measureText(mText);
+        mTextWidth = mText == null ? 0 : mTextPaint.measureText(mText);
         Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
         mTextHeight = fontMetrics.bottom;
     }
