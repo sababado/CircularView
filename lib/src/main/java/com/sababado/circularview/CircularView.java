@@ -143,7 +143,6 @@ public class CircularView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         paddingLeft = getPaddingLeft();
         paddingTop = getPaddingTop();
         paddingRight = getPaddingRight();
@@ -151,63 +150,43 @@ public class CircularView extends View {
 
         // init circle dimens
         final int shortDimension = Math.min(
-                mHeight = getMeasuredHeight(),
-                mWidth = getMeasuredWidth());
-        final float circleRadius = (shortDimension * CIRCLE_WEIGHT_LONG_ORIENTATION - DEFAULT_MARKER_RADIUS * 4f - CIRCLE_TO_MARKER_PADDING * 2f) / 2f;
+                mHeight = super.getDefaultSize(getSuggestedMinimumHeight(), widthMeasureSpec),
+                mWidth = super.getDefaultSize(getSuggestedMinimumWidth(), heightMeasureSpec));
+        final float actualDimension = Math.round(shortDimension * CIRCLE_WEIGHT_LONG_ORIENTATION);
+        final float circleRadius = (actualDimension - DEFAULT_MARKER_RADIUS * 4f - CIRCLE_TO_MARKER_PADDING * 2f) / 2f;
         final float circleCenterX = shortDimension / 2f;
         final float circleCenterY = shortDimension / 2f;
         mCircle.init(circleCenterX, circleCenterY, circleRadius, mAdapterDataSetObserver);
+
+        setMeasuredDimension(getDefaultSize((int) Math.ceil(actualDimension), widthMeasureSpec),
+                getDefaultSize((int) Math.ceil(actualDimension + circleRadius), heightMeasureSpec));
     }
 
     /**
-     * Determines the width of this view
-     * @param measureSpec A measureSpec packed into an int
-     * @return The width of the view, honoring constraints from measureSpec
+     * Utility to return a default size. Uses the supplied size if the
+     * MeasureSpec imposed no constraints. Will get larger if allowed
+     * by the MeasureSpec.
+     *
+     * @param size        Default size for this view
+     * @param measureSpec Constraints imposed by the parent
+     * @return The size this view should be.
      */
-    private int measureWidth(int measureSpec) {
-        int result = 0;
-        int specMode = MeasureSpec.getMode(measureSpec);
-        int specSize = MeasureSpec.getSize(measureSpec);
+    public static int getDefaultSize(final int size, final int measureSpec) {
+        final int result;
+        final int specMode = MeasureSpec.getMode(measureSpec);
+        final int specSize = MeasureSpec.getSize(measureSpec);
 
-        if (specMode == MeasureSpec.EXACTLY) {
-            // We were told how big to be
-            result = specSize;
-        } else {
-            // Measure the text
-            result = mOval_r + getPaddingLeft()
-                    + getPaddingRight();
-            if (specMode == MeasureSpec.AT_MOST) {
-                // Respect AT_MOST value if that was what is called for by measureSpec
-                result = Math.min(result, specSize);
-            }
+        switch (specMode) {
+            case MeasureSpec.AT_MOST:
+                result = Math.min(size, specSize);
+                break;
+            case MeasureSpec.EXACTLY:
+                result = specSize;
+                break;
+            default:
+                result = size;
+                break;
         }
-
-        return result;
-    }
-
-    /**
-     * Determines the height of this view
-     * @param measureSpec A measureSpec packed into an int
-     * @return The height of the view, honoring constraints from measureSpec
-     */
-    private int measureHeight(int measureSpec) {
-        int result = 0;
-        int specMode = MeasureSpec.getMode(measureSpec);
-        int specSize = MeasureSpec.getSize(measureSpec);
-
-        if (specMode == MeasureSpec.EXACTLY) {
-            // We were told how big to be
-            result = specSize;
-        } else {
-            // Measure the text (beware: ascent is a negative number)
-            result = mOval_b + getPaddingTop()
-                    + getPaddingBottom();
-            if (specMode == MeasureSpec.AT_MOST) {
-                // Respect AT_MOST value if that was what is called for by measureSpec
-                result = Math.min(result, specSize);
-            }
-        }
-
         return result;
     }
 
@@ -529,8 +508,8 @@ public class CircularView extends View {
      * set to true the marker will constantly be animating.
      *
      * @return True if a marker should animate when it is highlighted, false if not.
-     * @see #setHighlightedDegree(float)
      * @attr ref R.styleable#CircularView_animateMarkersOnStillHighlight
+     * @see #setHighlightedDegree(float)
      */
     public boolean isAnimateMarkerOnStillHighlight() {
         return mAnimateMarkersOnStillHighlight;

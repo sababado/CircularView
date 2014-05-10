@@ -61,14 +61,14 @@ public class MainActivity extends Activity {
             @Override
             public void onHighlightAnimationEnd(CircularView view, Marker marker, int position) {
                 Toast.makeText(MainActivity.this, "Spin ends on " + marker.getId(), Toast.LENGTH_SHORT).show();
-                marker.setVisibility(marker.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+//                marker.setVisibility(marker.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
                 circularView.setTextColor(Color.BLUE);
             }
         });
     }
 
     public class MySimpleCircularViewAdapter extends SimpleCircularViewAdapter {
-        int count = 29;
+        int count = 15;
 
         @Override
         public int getCount() {
@@ -79,7 +79,7 @@ public class MainActivity extends Activity {
         public void setupMarker(final int position, final Marker marker) {
             marker.setSrc(R.drawable.center_bg);
             marker.setFitToCircle(true);
-            marker.setRadius(10 + 2 * position);
+//            marker.setRadius(10 + 2 * position);
         }
     }
 
