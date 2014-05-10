@@ -31,7 +31,7 @@ public class CircularView extends View {
     private float mTextHeight;
 
     private Paint mCirclePaint;
-    private static final float CIRCLE_WEIGHT_LONG_ORIENTATION = 0.8f;
+    private static final float CIRCLE_WEIGHT_LONG_ORIENTATION = 0.9f;
     private static final float CIRCLE_TO_MARKER_PADDING = 20f;
     private final float DEFAULT_MARKER_RADIUS = 40;
     private float mMarkerStartingPoint;
@@ -173,16 +173,16 @@ public class CircularView extends View {
 
         // init circle dimens
         final int shortDimension = Math.min(
-                mHeight = super.getDefaultSize(getSuggestedMinimumHeight(), widthMeasureSpec),
-                mWidth = super.getDefaultSize(getSuggestedMinimumWidth(), heightMeasureSpec));
+                mWidth = super.getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec),
+                mHeight = super.getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec));
         final float actualDimension = Math.round(shortDimension * CIRCLE_WEIGHT_LONG_ORIENTATION);
         final float circleRadius = (actualDimension - DEFAULT_MARKER_RADIUS * 4f - CIRCLE_TO_MARKER_PADDING * 2f) / 2f;
-        final float circleCenterX = shortDimension / 2f;
-        final float circleCenterY = shortDimension / 2f;
+        final float circleCenterX = mWidth / 2f;
+        final float circleCenterY = mHeight / 2f;
         mCircle.init(circleCenterX, circleCenterY, circleRadius, mAdapterDataSetObserver);
 
         setMeasuredDimension(getDefaultSize((int) Math.ceil(actualDimension), widthMeasureSpec),
-                getDefaultSize((int) Math.ceil(actualDimension + circleRadius), heightMeasureSpec));
+                getDefaultSize((int) Math.ceil(actualDimension), heightMeasureSpec));
     }
 
     /**
@@ -238,7 +238,7 @@ public class CircularView extends View {
             final int markerCount = mAdapter.getCount();
             assert (markerCount >= 0);
             if (mMarkerList == null) {
-                mMarkerList = new ArrayList<>(markerCount);
+                mMarkerList = new ArrayList<Marker>(markerCount);
             }
             int markerViewListSize = mMarkerList.size();
             final float degreeInterval = 360.0f / markerCount;

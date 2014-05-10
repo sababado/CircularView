@@ -13,7 +13,7 @@
         android:id="@+id/circular_view"
         android:background="#ccc"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:textSize="24sp"
         app:centerBackgroundColor="#33b5e5"
         app:text="Hello, MyView"
