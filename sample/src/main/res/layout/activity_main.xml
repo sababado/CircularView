@@ -12,15 +12,14 @@
     <com.sababado.circularview.CircularView
         android:id="@+id/circular_view"
         android:background="#ccc"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingLeft="20dp"
-        android:paddingBottom="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:textSize="24sp"
         app:centerBackgroundColor="#33b5e5"
         app:text="Hello, MyView"
         app:centerDrawable="@drawable/center_bg"
-        app:markerStartingPoint="bottom"/>
+        app:markerStartingPoint="bottom"
+        android:layout_centerInParent="true"/>
 
 
 </RelativeLayout>

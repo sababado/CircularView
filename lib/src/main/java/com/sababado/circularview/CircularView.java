@@ -144,13 +144,71 @@ public class CircularView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        paddingLeft = getPaddingLeft();
+        paddingTop = getPaddingTop();
+        paddingRight = getPaddingRight();
+        paddingBottom = getPaddingBottom();
+
         // init circle dimens
         final int shortDimension = Math.min(
                 mHeight = getMeasuredHeight(),
                 mWidth = getMeasuredWidth());
         final float circleRadius = (shortDimension * CIRCLE_WEIGHT_LONG_ORIENTATION - DEFAULT_MARKER_RADIUS * 4f - CIRCLE_TO_MARKER_PADDING * 2f) / 2f;
-        final float circleCenter = shortDimension / 2f;
-        mCircle.init(circleCenter, circleCenter, circleRadius, mAdapterDataSetObserver);
+        final float circleCenterX = shortDimension / 2f;
+        final float circleCenterY = shortDimension / 2f;
+        mCircle.init(circleCenterX, circleCenterY, circleRadius, mAdapterDataSetObserver);
+    }
+
+    /**
+     * Determines the width of this view
+     * @param measureSpec A measureSpec packed into an int
+     * @return The width of the view, honoring constraints from measureSpec
+     */
+    private int measureWidth(int measureSpec) {
+        int result = 0;
+        int specMode = MeasureSpec.getMode(measureSpec);
+        int specSize = MeasureSpec.getSize(measureSpec);
+
+        if (specMode == MeasureSpec.EXACTLY) {
+            // We were told how big to be
+            result = specSize;
+        } else {
+            // Measure the text
+            result = mOval_r + getPaddingLeft()
+                    + getPaddingRight();
+            if (specMode == MeasureSpec.AT_MOST) {
+                // Respect AT_MOST value if that was what is called for by measureSpec
+                result = Math.min(result, specSize);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Determines the height of this view
+     * @param measureSpec A measureSpec packed into an int
+     * @return The height of the view, honoring constraints from measureSpec
+     */
+    private int measureHeight(int measureSpec) {
+        int result = 0;
+        int specMode = MeasureSpec.getMode(measureSpec);
+        int specSize = MeasureSpec.getSize(measureSpec);
+
+        if (specMode == MeasureSpec.EXACTLY) {
+            // We were told how big to be
+            result = specSize;
+        } else {
+            // Measure the text (beware: ascent is a negative number)
+            result = mOval_b + getPaddingTop()
+                    + getPaddingBottom();
+            if (specMode == MeasureSpec.AT_MOST) {
+                // Respect AT_MOST value if that was what is called for by measureSpec
+                result = Math.min(result, specSize);
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -169,10 +227,6 @@ public class CircularView extends View {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        paddingLeft = getPaddingLeft();
-        paddingTop = getPaddingTop();
-        paddingRight = getPaddingRight();
-        paddingBottom = getPaddingBottom();
         setupMarkerList();
     }
 
