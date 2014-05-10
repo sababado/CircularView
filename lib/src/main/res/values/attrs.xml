@@ -45,5 +45,13 @@
 
         <!-- Flag that determines if markers will animate when the highlight animation is not running. -->
         <attr name="animateMarkersOnStillHighlight" format="boolean" />
+
+        <!-- Flag that determine if this object's drawable should fit inside of the center circle. -->
+        <attr name="fitToCircle" format="boolean" />
+
+        <!-- Attribute to display markers when in edit mode. -->
+        <attr name="editMode_markerCount" format="integer"/>
+        <!-- Set the marker radius for edit mode only. -->
+        <attr name="editMode_markerRadius" format="integer"/>
     </declare-styleable>
 </resources>

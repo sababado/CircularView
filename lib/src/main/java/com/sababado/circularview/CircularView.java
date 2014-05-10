@@ -37,6 +37,7 @@ public class CircularView extends View {
     private float mMarkerStartingPoint;
 
     private BaseCircularViewAdapter mAdapter;
+
     private final AdapterDataSetObserver mAdapterDataSetObserver = new AdapterDataSetObserver();
     private OnClickListener mOnCircularViewObjectClickListener;
     private OnHighlightAnimationEndListener mOnHighlightAnimationEndListener;
@@ -68,6 +69,9 @@ public class CircularView extends View {
     public static final int BOTTOM = 90;
     public static final int LEFT = 180;
     public static final int RIGHT = 0;
+
+    private int mEditModeMarkerCount;
+    private int mEditModeMarkerRadius;
 
     public CircularView(Context context) {
         super(context);
@@ -137,8 +141,27 @@ public class CircularView extends View {
 
         mCircle = new CircularViewObject(getContext(), CIRCLE_TO_MARKER_PADDING, centerBackgroundColor);
         mCircle.setSrc(circleDrawable);
+        mCircle.setFitToCircle(a.getBoolean(R.styleable.CircularView_fitToCircle, false));
+
+        mEditModeMarkerCount = a.getInt(R.styleable.CircularView_editMode_markerCount, 0);
+        mEditModeMarkerRadius = a.getInt(R.styleable.CircularView_editMode_markerRadius, (int) DEFAULT_MARKER_RADIUS);
 
         a.recycle();
+
+        if (isInEditMode()) {
+            mAdapter = new SimpleCircularViewAdapter() {
+                @Override
+                public int getCount() {
+                    return mEditModeMarkerCount;
+                }
+
+                @Override
+                public void setupMarker(int position, Marker marker) {
+                    marker.setRadius(mEditModeMarkerRadius);
+                    marker.setCenterBackgroundColor(getResources().getColor(android.R.color.black));
+                }
+            };
+        }
     }
 
     @Override

@@ -19,6 +19,9 @@
         app:text="Hello, MyView"
         app:centerDrawable="@drawable/center_bg"
         app:markerStartingPoint="bottom"
+        app:editMode_markerCount="15"
+        app:editMode_markerRadius="@integer/marker_radius"
+        app:fitToCircle="true"
         android:layout_centerInParent="true"/>
 
 
