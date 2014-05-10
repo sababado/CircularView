@@ -33,7 +33,8 @@ public class CircularView extends View {
     private Paint mCirclePaint;
     private static final float CIRCLE_WEIGHT_LONG_ORIENTATION = 0.9f;
     private static final float CIRCLE_TO_MARKER_PADDING = 20f;
-    private final float DEFAULT_MARKER_RADIUS = 40;
+    private final float BASE_MARKER_RADIUS = 40;
+    private int mDefaultMarkerRadius = (int)BASE_MARKER_RADIUS;
     private float mMarkerStartingPoint;
 
     private BaseCircularViewAdapter mAdapter;
@@ -143,8 +144,10 @@ public class CircularView extends View {
         mCircle.setSrc(circleDrawable);
         mCircle.setFitToCircle(a.getBoolean(R.styleable.CircularView_fitToCircle, false));
 
+        mDefaultMarkerRadius = getResources().getInteger(R.integer.cv_default_marker_radius);
+
         mEditModeMarkerCount = a.getInt(R.styleable.CircularView_editMode_markerCount, 0);
-        mEditModeMarkerRadius = a.getInt(R.styleable.CircularView_editMode_markerRadius, (int) DEFAULT_MARKER_RADIUS);
+        mEditModeMarkerRadius = a.getInt(R.styleable.CircularView_editMode_markerRadius, mDefaultMarkerRadius);
 
         a.recycle();
 
@@ -176,7 +179,7 @@ public class CircularView extends View {
                 mWidth = super.getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec),
                 mHeight = super.getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec));
         final float actualDimension = Math.round(shortDimension * CIRCLE_WEIGHT_LONG_ORIENTATION);
-        final float circleRadius = (actualDimension - DEFAULT_MARKER_RADIUS * 4f - CIRCLE_TO_MARKER_PADDING * 2f) / 2f;
+        final float circleRadius = (actualDimension - BASE_MARKER_RADIUS * 4f - CIRCLE_TO_MARKER_PADDING * 2f) / 2f;
         final float circleCenterX = mWidth / 2f;
         final float circleCenterY = mHeight / 2f;
         mCircle.init(circleCenterX, circleCenterY, circleRadius, mAdapterDataSetObserver);
@@ -242,7 +245,7 @@ public class CircularView extends View {
             }
             int markerViewListSize = mMarkerList.size();
             final float degreeInterval = 360.0f / markerCount;
-            final float radiusFromCenter = mCircle.getRadius() + CIRCLE_TO_MARKER_PADDING + DEFAULT_MARKER_RADIUS;
+            final float radiusFromCenter = mCircle.getRadius() + CIRCLE_TO_MARKER_PADDING + BASE_MARKER_RADIUS;
             int position = 0;
             float degree = mMarkerStartingPoint;
             // loop clockwise
@@ -265,7 +268,7 @@ public class CircularView extends View {
                 newMarker.init(
                         (float) (radiusFromCenter * Math.cos(rad)) + mCircle.getX(),
                         (float) (radiusFromCenter * Math.sin(rad)) + mCircle.getY(),
-                        DEFAULT_MARKER_RADIUS,
+                        BASE_MARKER_RADIUS,
                         normalizeDegree(sectionMin),
                         normalizeDegree(sectionMin + degreeInterval) - 0.001f,
                         mAdapterDataSetObserver);
@@ -334,7 +337,7 @@ public class CircularView extends View {
 
         // Draw line
         if (mIsAnimating) {
-            final float radiusFromCenter = mCircle.getRadius() + CIRCLE_TO_MARKER_PADDING + DEFAULT_MARKER_RADIUS;
+            final float radiusFromCenter = mCircle.getRadius() + CIRCLE_TO_MARKER_PADDING + BASE_MARKER_RADIUS;
             final float x = (float) Math.cos(Math.toRadians(mHighlightedDegree)) * radiusFromCenter + mCircle.getX();
             final float y = (float) Math.sin(Math.toRadians(mHighlightedDegree)) * radiusFromCenter + mCircle.getY();
             canvas.drawLine(mCircle.getX(), mCircle.getY(), x, y, mCirclePaint);

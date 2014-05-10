@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="marker_radius">30</integer>
+    <integer name="cv_default_marker_radius">40</integer>
 </resources>
