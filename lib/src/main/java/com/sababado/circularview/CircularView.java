@@ -268,7 +268,7 @@ public class CircularView extends View {
                 newMarker.init(
                         (float) (radiusFromCenter * Math.cos(rad)) + mCircle.getX(),
                         (float) (radiusFromCenter * Math.sin(rad)) + mCircle.getY(),
-                        BASE_MARKER_RADIUS,
+                        mDefaultMarkerRadius,
                         normalizeDegree(sectionMin),
                         normalizeDegree(sectionMin + degreeInterval) - 0.001f,
                         mAdapterDataSetObserver);
