@@ -122,3 +122,18 @@ The latter line is necessary in case the bounce animation should also run initia
 * By default, markers are drawn in the order that they're created; meaning if markers overlap then the first marker will be partially covered by the next marker. An option can be set to draw the highlighted marker on top of the markers next to it with `circularView.setDrawHighlightedMarkerOnTop(true);`. The flag is false by default.
 * Any CircularViewObject can be hidden and shown independently of other objects using `setVisibility(int)`
 * In a layout editor use the attribute `editMode_markerCount` and `editMode_markerRadius` to see the size and layout of markers. Not supplying a radius will show the default radius.
+
+##License
+Copyright 2014 Robert Szabo
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
