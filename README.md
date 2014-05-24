@@ -124,6 +124,7 @@ The latter line is necessary in case the bounce animation should also run initia
 * In a layout editor use the attribute `editMode_markerCount` and `editMode_markerRadius` to see the size and layout of markers. Not supplying a radius will show the default radius.
 
 ##License
+```
 Copyright 2014 Robert Szabo
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -137,3 +138,4 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+```
