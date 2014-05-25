@@ -8,6 +8,10 @@ A custom view for Android. It consists of a larger center circle that it surroun
 
 ![Quick example screenshot](http://s27.postimg.org/a9nzujq8z/Circular_View_example.png)
 
+
+![Usage in Date Night](http://postimg.org/image/befw9sbub/)
+![Screenshot of the sample app](http://postimg.org/image/3zn9qmm47/)
+
 ##Usage
 
 The library can be referenced from maven central.
