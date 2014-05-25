@@ -15,6 +15,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.MotionEvent;
+import android.view.SoundEffectConstants;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -603,17 +604,42 @@ public class CircularView extends View {
 
         // check all markers
         if (mMarkerList != null) {
-            int position = 0;
-            for (final Marker marker : mMarkerList) {
-                final int status = marker.onTouchEvent(event);
+            // check to see if the highlighted marker is on top. If so, check it before the other markers.
+            boolean highlightedMarkerHandlesEvent = false;
+            if(mHighlightedMarker != null && mDrawHighlightedMarkerOnTop) {
+                final int status = mHighlightedMarker.onTouchEvent(event);
                 if (status >= 0) {
                     handled = status != MotionEvent.ACTION_MOVE;
                     if (status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
-                        mOnCircularViewObjectClickListener.onMarkerClick(this, marker, position);
+                        playSoundEffect(SoundEffectConstants.CLICK);
+                        mOnCircularViewObjectClickListener.onMarkerClick(this, mHighlightedMarker, mHighlightedMarkerPosition);
                     }
-                    break;
+                    highlightedMarkerHandlesEvent = true;
                 }
-                position++;
+            }
+
+            if(!highlightedMarkerHandlesEvent) {
+                final int size = mMarkerList.size();
+                // Since markers are drawn first to last, the last marker will be on top, so search
+                // for a click from last to first.
+
+                for (int i = size - 1; i > -1; i--) {
+                    if(mDrawHighlightedMarkerOnTop && i == mHighlightedMarkerPosition) {
+                        // If the marker is to be drawn on top then it will have already been checked
+                        // by this point. Don't check it again.
+                        continue;
+                    }
+                    final Marker marker = mMarkerList.get(i);
+                    final int status = marker.onTouchEvent(event);
+                    if (status >= 0) {
+                        handled = status != MotionEvent.ACTION_MOVE;
+                        if (status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
+                            playSoundEffect(SoundEffectConstants.CLICK);
+                            mOnCircularViewObjectClickListener.onMarkerClick(this, marker, i);
+                        }
+                        break;
+                    }
+                }
             }
         }
 
@@ -623,6 +649,7 @@ public class CircularView extends View {
             if (status >= 0) {
                 handled = true;
                 if (status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
+                    playSoundEffect(SoundEffectConstants.CLICK);
                     mOnCircularViewObjectClickListener.onClick(this);
                 }
             }
