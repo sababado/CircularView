@@ -14,7 +14,7 @@ The library can be referenced from maven central.
 
 Gradle
 ```Groovy
-compile 'com.sababado.circularview:library:0.9.+'
+compile 'com.sababado.circularview:library:1.0.+'
 ```
 
 The `CircularView` can be defined in a XML layout or in code.
