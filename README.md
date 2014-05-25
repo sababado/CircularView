@@ -9,7 +9,6 @@ A custom view for Android. It consists of a larger center circle that it surroun
 ![Quick example screenshot](http://s27.postimg.org/a9nzujq8z/Circular_View_example.png)
 
 ![Usage in Date Night](http://s27.postimg.org/wbvf0be5v/Screenshot_2014_05_25_17_31_57.png)
-
 ![Screenshot of the sample app](http://s27.postimg.org/4eb72vecz/Screenshot_2014_05_25_17_31_42.png)
 ##Usage
 
