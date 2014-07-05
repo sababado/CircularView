@@ -116,7 +116,22 @@ circularView.setHighlightedDegree(circularView.BOTTOM);
 
 The latter line is necessary in case the bounce animation should also run initially. The highlighted degree is set to `CircularView.HIGHLIGHT_NONE` by default.
 
-##Customization
+##Proguard
+If using proguard add the following to your proguard script to make sure animations run
+
+```
+# keep setters in Views so that animations can still work.
+# see http://proguard.sourceforge.net/manual/examples.html#beans
+-keepclassmembers public class * extends android.view.View {
+   void set*(***);
+   *** get*();
+}
+# keep setters in CircularViewObjects so that animations can still work.
+-keepclassmembers public class * extends com.sababado.circularview.CircularViewObject {
+   void set*(***);
+   *** get*();
+}
+```
 
 
 ##Developer Hints
