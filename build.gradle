@@ -5,15 +5,15 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.12.+'
+        classpath 'com.android.tools.build:gradle:1.0.0'
     }
 }
 
 allprojects {
-    project.ext['compileSdkVersion'] = 19
-    project.ext['buildToolsVersion'] = "20"
+    project.ext['compileSdkVersion'] = 21
+    project.ext['buildToolsVersion'] = "21.1.2"
     project.ext['minSdkVersion'] = 16
-    project.ext['targetSdkVersion'] = 19
+    project.ext['targetSdkVersion'] = 21
 
     version = VERSION_NAME
     group = GROUP
