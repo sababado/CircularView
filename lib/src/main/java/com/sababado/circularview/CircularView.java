@@ -35,7 +35,7 @@ public class CircularView extends View {
     private static final float CIRCLE_WEIGHT_LONG_ORIENTATION = 0.9f;
     private static final float CIRCLE_TO_MARKER_PADDING = 20f;
     private final float BASE_MARKER_RADIUS = 40;
-    private int mDefaultMarkerRadius = (int)BASE_MARKER_RADIUS;
+    private int mDefaultMarkerRadius = (int) BASE_MARKER_RADIUS;
     private float mMarkerStartingPoint;
 
     private BaseCircularViewAdapter mAdapter;
@@ -151,6 +151,8 @@ public class CircularView extends View {
         mEditModeMarkerRadius = a.getInt(R.styleable.CircularView_editMode_markerRadius, mDefaultMarkerRadius);
 
         a.recycle();
+
+        setOnLongClickListener(mOnLongClickListener);
 
         if (isInEditMode()) {
             mAdapter = new SimpleCircularViewAdapter() {
@@ -598,6 +600,10 @@ public class CircularView extends View {
         this.mDrawHighlightedMarkerOnTop = drawHighlightedMarkerOnTop;
     }
 
+    private boolean mLongClickRegistered = false;
+    private Marker mTouchEventMarker = null;
+    private Integer mTouchEventMarkerPos = null;
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean handled = false;
@@ -606,25 +612,31 @@ public class CircularView extends View {
         if (mMarkerList != null) {
             // check to see if the highlighted marker is on top. If so, check it before the other markers.
             boolean highlightedMarkerHandlesEvent = false;
-            if(mHighlightedMarker != null && mDrawHighlightedMarkerOnTop) {
+            if (mHighlightedMarker != null && mDrawHighlightedMarkerOnTop) {
                 final int status = mHighlightedMarker.onTouchEvent(event);
                 if (status >= 0) {
                     handled = status != MotionEvent.ACTION_MOVE;
+                    mTouchEventMarker = mHighlightedMarker;
+                    mTouchEventMarkerPos = mHighlightedMarkerPosition;
                     if (status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
-                        playSoundEffect(SoundEffectConstants.CLICK);
-                        mOnCircularViewObjectClickListener.onMarkerClick(this, mHighlightedMarker, mHighlightedMarkerPosition);
+                        if (mLongClickRegistered) {
+                            mLongClickRegistered = false;
+                        } else {
+                            playSoundEffect(SoundEffectConstants.CLICK);
+                            mOnCircularViewObjectClickListener.onMarkerClick(this, mHighlightedMarker, mHighlightedMarkerPosition, false);
+                        }
                     }
                     highlightedMarkerHandlesEvent = true;
                 }
             }
 
-            if(!highlightedMarkerHandlesEvent) {
+            if (!highlightedMarkerHandlesEvent) {
                 final int size = mMarkerList.size();
                 // Since markers are drawn first to last, the last marker will be on top, so search
                 // for a click from last to first.
 
                 for (int i = size - 1; i > -1; i--) {
-                    if(mDrawHighlightedMarkerOnTop && i == mHighlightedMarkerPosition) {
+                    if (mDrawHighlightedMarkerOnTop && i == mHighlightedMarkerPosition) {
                         // If the marker is to be drawn on top then it will have already been checked
                         // by this point. Don't check it again.
                         continue;
@@ -633,9 +645,15 @@ public class CircularView extends View {
                     final int status = marker.onTouchEvent(event);
                     if (status >= 0) {
                         handled = status != MotionEvent.ACTION_MOVE;
+                        mTouchEventMarker = marker;
+                        mTouchEventMarkerPos = i;
                         if (status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
-                            playSoundEffect(SoundEffectConstants.CLICK);
-                            mOnCircularViewObjectClickListener.onMarkerClick(this, marker, i);
+                            if (mLongClickRegistered) {
+                                mLongClickRegistered = false;
+                            } else {
+                                playSoundEffect(SoundEffectConstants.CLICK);
+                                mOnCircularViewObjectClickListener.onMarkerClick(this, marker, i, false);
+                            }
                         }
                         break;
                     }
@@ -648,16 +666,42 @@ public class CircularView extends View {
             final int status = mCircle.onTouchEvent(event);
             if (status >= 0) {
                 handled = true;
+                mTouchEventMarker = null;
+                mTouchEventMarkerPos = -1;
                 if (status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
-                    playSoundEffect(SoundEffectConstants.CLICK);
-                    mOnCircularViewObjectClickListener.onClick(this);
+                    if (mLongClickRegistered) {
+                        mLongClickRegistered = false;
+                    } else {
+                        playSoundEffect(SoundEffectConstants.CLICK);
+                        mOnCircularViewObjectClickListener.onClick(this, false);
+                    }
                 }
             }
         }
 
-
-        return handled || super.onTouchEvent(event);
+        return super.onTouchEvent(event);
     }
+
+    private OnLongClickListener mOnLongClickListener = new OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            if (isLongClickable()) {
+                mLongClickRegistered = true;
+                if (mTouchEventMarkerPos == -1) {
+                    playSoundEffect(SoundEffectConstants.CLICK);
+                    mOnCircularViewObjectClickListener.onClick(CircularView.this, true);
+                    mTouchEventMarkerPos = null;
+                } else if (mTouchEventMarker != null) {
+                    playSoundEffect(SoundEffectConstants.CLICK);
+                    mOnCircularViewObjectClickListener.onMarkerClick(CircularView.this, mTouchEventMarker, mTouchEventMarkerPos, true);
+                    mTouchEventMarker = null;
+                    mTouchEventMarkerPos = null;
+                }
+                return mLongClickRegistered;
+            }
+            return false;
+        }
+    };
 
     /**
      * Set the click listener that will receive a callback when the center circle is clicked.
@@ -801,18 +845,20 @@ public class CircularView extends View {
         /**
          * Called when the center view object has been clicked.
          *
-         * @param view The circular view that was clicked.
+         * @param view        The circular view that was clicked.
+         * @param isLongClick True if this click is coming from a long click, false if not.
          */
-        public void onClick(CircularView view);
+        public void onClick(CircularView view, boolean isLongClick);
 
         /**
          * Called when a marker is clicked.
          *
-         * @param view     The circular view that the marker belongs to
-         * @param marker   The marker that was clicked.
-         * @param position The position of the marker in the adapter
+         * @param view        The circular view that the marker belongs to
+         * @param marker      The marker that was clicked.
+         * @param position    The position of the marker in the adapter
+         * @param isLongClick True if this click is coming from a long click, false if not.
          */
-        public void onMarkerClick(CircularView view, Marker marker, int position);
+        public void onMarkerClick(CircularView view, Marker marker, int position, boolean isLongClick);
     }
 
     /**
