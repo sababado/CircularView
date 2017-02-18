@@ -72,15 +72,17 @@ Click events can be received from the `CircularView`.
 To receive click events set a `CircularView.OnClickListener` into `circularView.setOnCircularViewObjectClickListener(l)`. For example:
 ```JAVA
 circularView.setOnCircularViewObjectClickListener(new CircularView.OnClickListener() {
-	 public void onClick(final CircularView view) {
+	 public void onClick(final CircularView view, boolean isLongClick) {
         Toast.makeText(MainActivity.this, "Clicked center", Toast.LENGTH_SHORT).show();
     }
 
-    public void onMarkerClick(CircularView view, Marker marker, int position) {
+    public void onMarkerClick(CircularView view, Marker marker, int position, boolean isLongClick) {
         Toast.makeText(MainActivity.this, "Clicked " + marker.getId(), Toast.LENGTH_SHORT).show();
     }
 });
 ```
+
+Long click events will come in through the same listener.
 
 ###Animation
 There are a few simple animations built into the library at the moment.
