@@ -12,11 +12,11 @@ A custom view for Android. It consists of a larger center circle that it surroun
 ![Screenshot of the sample app](http://s27.postimg.org/4eb72vecz/Screenshot_2014_05_25_17_31_42.png)
 ##Usage
 
-The library can be referenced from maven central.
+The library can be referenced from *jcenter*.
 
 Gradle
 ```Groovy
-compile 'com.sababado.circularview:library:1.0.+'
+compile 'com.sababado.circularview:library:1.1.+'
 ```
 
 The `CircularView` can be defined in a XML layout or in code.
