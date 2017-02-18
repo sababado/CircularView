@@ -9,13 +9,16 @@ import android.util.Log;
 import android.widget.CursorAdapter;
 
 /**
+ * <p>
  * Adapter that exposes data from a {@link android.database.Cursor Cursor} to a
  * {@link android.widget.ListView ListView} widget.
- * <p/>
+ * </p>
+ * <p>
  * The Cursor must include a column named "_id" or this class will not work.
  * Additionally, using {@link android.database.MergeCursor} with this class will
  * not work if the merged Cursors have overlapping values in their "_id"
  * columns.
+ * </p>
  */
 public abstract class CircularViewCursorAdapter implements BaseCircularViewAdapter {
     private static final String TAG = CircularViewCursorAdapter.class.getSimpleName();

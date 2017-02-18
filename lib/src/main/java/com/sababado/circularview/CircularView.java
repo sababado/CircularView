@@ -373,9 +373,9 @@ public class CircularView extends View {
 
     /**
      * Get the adapter that has been set on this view.
+     * See #setAdapter(BaseCircularViewAdapter)
      *
      * @return The adapter that has been set on this view.
-     * @see #setAdapter(BaseCircularViewAdapter)
      */
     public BaseCircularViewAdapter getAdapter() {
         return mAdapter;
@@ -383,9 +383,9 @@ public class CircularView extends View {
 
     /**
      * Gets the text for this view.
+     * See R.styleable#CircularView_text
      *
      * @return The text for this view.
-     * @attr ref R.styleable#CircularView_text
      */
     public String getText() {
         return mText;
@@ -393,9 +393,9 @@ public class CircularView extends View {
 
     /**
      * Sets the view's text.
+     * See R.styleable#CircularView_text
      *
      * @param text The view's text.
-     * @attr ref R.styleable#CircularView_text
      */
     public void setText(String text) {
         mText = text;
@@ -404,9 +404,9 @@ public class CircularView extends View {
 
     /**
      * Gets the example dimension attribute value.
+     * See R.styleable#CircularView_textSize
      *
      * @return The example dimension attribute value.
-     * @attr ref R.styleable#CircularView_textSize
      */
     public float getTextSize() {
         return mTextPaint.getTextSize();
@@ -416,9 +416,9 @@ public class CircularView extends View {
      * Set the default text size to the given value, interpreted as "scaled
      * pixel" units.  This size is adjusted based on the current density and
      * user font size preference.
+     * See R.styleable#CircularView_textSize
      *
      * @param size The scaled pixel size.
-     * @attr ref R.styleable#CircularView_textSize
      */
     public void setTextSize(float size) {
         setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
@@ -427,10 +427,10 @@ public class CircularView extends View {
     /**
      * Set the default text size to a given unit and value.  See {@link
      * TypedValue} for the possible dimension units.
+     * See R.styleable#CircularView_textSize
      *
      * @param unit The desired dimension unit.
      * @param size The desired size in the given units.
-     * @attr ref R.styleable#CircularView_textSize
      */
     public void setTextSize(int unit, float size) {
         Context c = getContext();
@@ -458,9 +458,9 @@ public class CircularView extends View {
      * as well as r,g,b. This 32bit value is not premultiplied, meaning that
      * its alpha can be any value, regardless of the values of r,g,b.
      * See the Color class for more details.
+     * See R.styleable#CircularView_textColor
      *
      * @param color The new color (including alpha) to set for the text.
-     * @attr ref R.styleable#CircularView_textColor
      */
     public void setTextColor(int color) {
         if (mTextPaint.getColor() != color) {
@@ -475,9 +475,9 @@ public class CircularView extends View {
      * containing alpha as well as r,g,b. This 32bit value is not premultiplied,
      * meaning that its alpha can be any value, regardless of the values of
      * r,g,b. See the Color class for more details.
+     * See R.styleable#CircularView_textColor
      *
      * @return the text's color (and alpha).
-     * @attr ref R.styleable#CircularView_textColor
      */
     public int getTextColor() {
         return mTextPaint.getColor();
@@ -485,9 +485,9 @@ public class CircularView extends View {
 
     /**
      * Get the degree that is currently highlighted.
+     * See R.styleable#CircularView_highlightedDegree
      *
      * @return The highlighted degree
-     * @attr ref R.styleable#CircularView_highlightedDegree
      */
     public float getHighlightedDegree() {
         return mHighlightedDegree;
@@ -495,9 +495,9 @@ public class CircularView extends View {
 
     /**
      * Set the degree that will trigger highlighting a marker. You can also set {@link #HIGHLIGHT_NONE} to not highlight any degree.
+     * See R.styleable#CircularView_highlightedDegree
      *
      * @param highlightedDegree Value in degrees.
-     * @attr ref R.styleable#CircularView_highlightedDegree
      */
     public void setHighlightedDegree(final float highlightedDegree) {
         this.mHighlightedDegree = highlightedDegree;
@@ -535,9 +535,9 @@ public class CircularView extends View {
     /**
      * Check if a marker should animate when it is highlighted. By default this is false and when it is
      * set to true the marker will constantly be animating.
+     * See R.styleable#CircularView_animateMarkersOnStillHighlight
      *
      * @return True if a marker should animate when it is highlighted, false if not.
-     * @attr ref R.styleable#CircularView_animateMarkersOnStillHighlight
      * @see #setHighlightedDegree(float)
      */
     public boolean isAnimateMarkerOnStillHighlight() {
@@ -547,9 +547,9 @@ public class CircularView extends View {
     /**
      * If set to true the marker that is highlighted with {@link #setHighlightedDegree(float)} will
      * animate continuously when the highlight degree is not animating. This is set to false by default.
+     * See R.styleable#CircularView_animateMarkersOnStillHighlight
      *
      * @param animateMarkerOnHighlight True to continuously animate, false to turn it off.
-     * @attr ref R.styleable#CircularView_animateMarkersOnStillHighlight
      */
     public void setAnimateMarkerOnStillHighlight(boolean animateMarkerOnHighlight) {
         this.mAnimateMarkersOnStillHighlight = animateMarkerOnHighlight;
@@ -581,9 +581,9 @@ public class CircularView extends View {
 
     /**
      * Returns the flag the determines if the highlighted marker will draw on top of other markers.
+     * See R.styleable#CircularView_drawHighlightedMarkerOnTop
      *
      * @return True if the highlighted marker will draw on top of other markers, false if they're all drawn in order.
-     * @attr ref R.styleable#CircularView_drawHighlightedMarkerOnTop
      */
     public boolean isDrawHighlightedMarkerOnTop() {
         return mDrawHighlightedMarkerOnTop;
@@ -592,9 +592,9 @@ public class CircularView extends View {
     /**
      * Set the flag that determines if the highlighted marker will draw on top of other markers.
      * This is false by default.
+     * See R.styleable#CircularView_drawHighlightedMarkerOnTop
      *
      * @param drawHighlightedMarkerOnTop the flag that determines if the highlighted marker will draw on top of other markers.
-     * @attr ref R.styleable#CircularView_drawHighlightedMarkerOnTop
      */
     public void setDrawHighlightedMarkerOnTop(boolean drawHighlightedMarkerOnTop) {
         this.mDrawHighlightedMarkerOnTop = drawHighlightedMarkerOnTop;
@@ -786,9 +786,9 @@ public class CircularView extends View {
 
     /**
      * Get the starting point for the markers.
+     * See R.styleable#CircularView_markerStartingPoint
      *
      * @return The starting point for the markers.
-     * @attr ref R.styleable#CircularView_markerStartingPoint
      */
     public float getMarkerStartingPoint() {
         return mMarkerStartingPoint;
@@ -796,9 +796,9 @@ public class CircularView extends View {
 
     /**
      * Set the starting point for the markers
+     * See R.styleable#CircularView_markerStartingPoint
      *
      * @param startingPoint Starting point for the markers
-     * @attr ref R.styleable#CircularView_markerStartingPoint
      */
     public void setMarkerStartingPoint(final float startingPoint) {
         mMarkerStartingPoint = startingPoint;
