@@ -10,7 +10,7 @@ A custom view for Android. It consists of a larger center circle that it surroun
 
 ![Usage in Date Night](http://s27.postimg.org/wbvf0be5v/Screenshot_2014_05_25_17_31_57.png)
 ![Screenshot of the sample app](http://s27.postimg.org/4eb72vecz/Screenshot_2014_05_25_17_31_42.png)
-##Usage
+## Usage
 
 The library can be referenced from *jcenter*.
 
@@ -21,8 +21,8 @@ compile 'com.sababado.circularview:library:1.1.+'
 
 The `CircularView` can be defined in a XML layout or in code.
 
-##Quick Setup
-###Adding the view to a layout
+## Quick Setup
+### Adding the view to a layout
 ```XML
 <com.sababado.circularview.CircularView
     android:id="@+id/circular_view"
@@ -37,7 +37,7 @@ Using the custom attributes requires the following in the layout file. [Example]
 xmlns:app="http://schemas.android.com/apk/res-auto"
 ```
 
-###Adding `Marker`s
+### Adding `Marker`s
 A `Marker` is an object that visual "floats" around the view. Each marker is can represent data or it can simply be for visual effect. Markers must be customized through a `CircularViewAdapter`.
 ```JAVA
 public class MySimpleCircularViewAdapter extends SimpleCircularViewAdapter {
@@ -66,7 +66,7 @@ circularView = (CircularView) findViewById(R.id.circular_view);
 circularView.setAdapter(mAdapter);
 ```
 
-###Receiving click listeners
+### Receiving click listeners
 Click events can be received from the `CircularView`.
 
 To receive click events set a `CircularView.OnClickListener` into `circularView.setOnCircularViewObjectClickListener(l)`. For example:
@@ -84,9 +84,9 @@ circularView.setOnCircularViewObjectClickListener(new CircularView.OnClickListen
 
 Long click events will come in through the same listener.
 
-###Animation
+### Animation
 There are a few simple animations built into the library at the moment.
-####Animate Highlighted Degree
+#### Animate Highlighted Degree
 The `CircularView` has `animateHighlightedDegree(start, end, duration)`. The method takes a start and end position in degrees, and a long value for the duration of the animation.
 The highlighted degree refers to which degree is "highlighted" or "focused". When a degree is focused it can trigger a secondary animation automatically for a `Marker`.
 
@@ -100,7 +100,7 @@ circularView.setOnHighlightAnimationEndListener(new CircularView.OnHighlightAnim
 });
 ```
 
-####Marker Animation Options
+#### Marker Animation Options
 `Marker`s have a simple animation associated with them; up and down. It can repeat or it can happen once.
 The `CircularView` can trigger the bounce animation when `animateHighlightedDegree(start, end, duration)` is called. The bounce animation can be turned off by calling the same method with an additional flag.
 For example:
@@ -118,7 +118,7 @@ circularView.setHighlightedDegree(circularView.BOTTOM);
 
 The latter line is necessary in case the bounce animation should also run initially. The highlighted degree is set to `CircularView.HIGHLIGHT_NONE` by default.
 
-##Proguard
+## Proguard
 If using proguard add the following to your proguard script to make sure animations run
 
 ```
@@ -136,13 +136,13 @@ If using proguard add the following to your proguard script to make sure animati
 ```
 
 
-##Developer Hints
+## Developer Hints
 * Every property that can be customized on a `CircularViewObject` can also be customized on a `Marker` object. A `Marker` object extends from a `CircularViewObject`. The former is used as a smaller object that floats around the center object. The center object is a `CircularViewObject`.
 * By default, markers are drawn in the order that they're created; meaning if markers overlap then the first marker will be partially covered by the next marker. An option can be set to draw the highlighted marker on top of the markers next to it with `circularView.setDrawHighlightedMarkerOnTop(true);`. The flag is false by default.
 * Any CircularViewObject can be hidden and shown independently of other objects using `setVisibility(int)`
 * In a layout editor use the attribute `editMode_markerCount` and `editMode_markerRadius` to see the size and layout of markers. Not supplying a radius will show the default radius.
 
-##License
+## License
 ```
 Copyright 2016 Robert Szabo
 
