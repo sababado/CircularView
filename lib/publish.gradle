@@ -4,7 +4,7 @@ ext {
 
     publishedGroupId = 'com.sababado.circularview'
     libraryName = 'CircularView'
-    artifact = 'CircularView'     // Has to be same as your library module name
+    artifact = 'library'     // Has to be same as your library module name
 
     libraryDescription = 'A custom view with a large center that can be wrapped by dynamic markers.'
 
@@ -15,7 +15,8 @@ ext {
 
     libraryVersion = '1.1.0'
 
-    developerId = 'rat141312'
+    binUser = 'rat141312'
+    developerId = 'sababado'
     developerName = 'Robert Szabo'
     developerEmail = 'robert.james.szabo@gmail.com'
 

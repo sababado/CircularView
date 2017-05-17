@@ -21,6 +21,7 @@ install {
                     license {
                         name licenseName
                         url licenseUrl
+                        distribution 'repo'
                     }
                 }
                 developers {
