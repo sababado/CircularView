@@ -1,18 +1,58 @@
-language: java
-
-jdk: oraclejdk7
+language: android
+jdk: oraclejdk8
 
 before_install:
-  - chmod +x gradlew
-  - export TERM=dumb
+  #- chmod +x gradlew
+  #- export TERM=dumb
   - sudo apt-get install -qq libstdc++6:i386 lib32z1
-  - export COMPONENTS=build-tools-20,android-19,extra-android-m2repository
-  - curl -L https://raw.github.com/embarkmobile/android-sdk-installer/version-1/android-sdk-installer | bash /dev/stdin --install=$COMPONENTS
-  - source ~/.android-sdk-installer/env
+  #- export COMPONENTS=build-tools-21.1.2,android-21,extra-android-m2repository
 
-after_success:
-  - bash initiate-publish.sh
+android:
+  components:
+    # Uncomment the lines below if you want to
+    # use the latest revision of Android SDK Tools
+    # - tools
+    # - tools
+    # - platform-tools
+
+    # The BuildTools version used by your project
+    - build-tools-21.1.2
+
+    # The SDK version used to compile your project
+    - android-21
+    #- add-on
+    #- extra
+
+    # Additional components
+    #- extra-google-google_play_services
+    - extra-google-m2repository
+    #- extra-android-m2repository
+    #- addon-google_apis-google-19
+
+    # Specify at least one system image,
+    # if you need to run emulator(s) during your tests
+    #- sys-img-armeabi-v7a-android-22
+    #- sys-img-armeabi-v7a-android-17
+
+#before_script:
+  # Create and start emulator
+#  - echo no | android create avd --force -n test -t android-21 --abi armeabi-v7a
+#  - emulator -avd test -no-skin -no-audio -no-window &
+#  - android-wait-for-emulator
+#  - adb shell input keyevent 82 &
+
+#script: ./gradlew connectedAndroidTest
 
 env:
   global:
     secure: PwTRTcoTXxyhaplFzvQMHUm5nFh7Ch7gdY50J2zV9SbVesrQaBSpmpVVXp0F/9itww8sSS3FziLfGhzs30PjSUFkQus9gIRGroSAC5bjtj6zhQUBsOoMo2ShOTsPu52svalJIov5eBvibo54vmEZDyaXh3EXYhX6BpNQraxJbhw=
+
+
+#before_cache:
+#  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+#  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+#cache:
+#  directories:
+#    - $HOME/.gradle/caches/
+#    - $HOME/.gradle/wrapper/
+#    - $HOME/.android/build-cache
