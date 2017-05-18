@@ -199,8 +199,12 @@ public class CircularViewObject {
     }
 
     /**
-     * Specify a set of states for the drawable. These are use-case specific, so see the relevant documentation. As an example, the background for widgets like Button understand the following states: [state_focused, state_pressed].<br/>
-     * If the new state you are supplying causes the appearance of the Drawable to change, then it is responsible for calling invalidateSelf() in order to have itself redrawn, and true will be returned from this function.<br/>
+     * Specify a set of states for the drawable. These are use-case specific, so see the relevant documentation. As an example, the background for widgets like Button understand the following states: [state_focused, state_pressed].
+     *
+     *
+     * If the new state you are supplying causes the appearance of the Drawable to change, then it is responsible for calling invalidateSelf() in order to have itself redrawn, and true will be returned from this function.
+     *
+     *
      * Note: The Drawable holds a reference on to stateSet until a new state array is given to it, so you must not modify this array during that time.
      *
      * @param stateSet The new set of states to be displayed.

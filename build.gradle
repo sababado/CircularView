@@ -2,23 +2,43 @@
 
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.android.tools.build:gradle:2.2.2'
+        // Required plugins added to classpath to facilitate pushing to Jcenter/Bintray
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
     }
 }
 
 allprojects {
-    project.ext['compileSdkVersion'] = 19
-    project.ext['buildToolsVersion'] = "19.0.3"
+    project.ext['compileSdkVersion'] = 21
+    project.ext['buildToolsVersion'] = "21.1.2"
     project.ext['minSdkVersion'] = 16
-    project.ext['targetSdkVersion'] = 19
+    project.ext['targetSdkVersion'] = 21
 
     version = VERSION_NAME
     group = GROUP
 
     repositories {
-        mavenCentral()
+        jcenter()
     }
 }
+
+def getBintrayPwd() {
+    def env = System.getenv("bintray_apikey")
+    if (env == null) {
+        env = "${bintray_apikey}"
+    }
+    return env;
+}
+
+def getBintrayGpg() {
+    def env = System.getenv("bintray_gpg_password")
+    if (env == null) {
+        env = "${bintray_gpg_password}"
+    }
+    return env;
+}
+

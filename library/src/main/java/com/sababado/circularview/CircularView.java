@@ -35,7 +35,7 @@ public class CircularView extends View {
     private static final float CIRCLE_WEIGHT_LONG_ORIENTATION = 0.9f;
     private static final float CIRCLE_TO_MARKER_PADDING = 20f;
     private final float BASE_MARKER_RADIUS = 40;
-    private int mDefaultMarkerRadius = (int)BASE_MARKER_RADIUS;
+    private int mDefaultMarkerRadius = (int) BASE_MARKER_RADIUS;
     private float mMarkerStartingPoint;
 
     private BaseCircularViewAdapter mAdapter;
@@ -151,6 +151,8 @@ public class CircularView extends View {
         mEditModeMarkerRadius = a.getInt(R.styleable.CircularView_editMode_markerRadius, mDefaultMarkerRadius);
 
         a.recycle();
+
+        setOnLongClickListener(mOnLongClickListener);
 
         if (isInEditMode()) {
             mAdapter = new SimpleCircularViewAdapter() {
@@ -371,9 +373,9 @@ public class CircularView extends View {
 
     /**
      * Get the adapter that has been set on this view.
+     * See #setAdapter(BaseCircularViewAdapter)
      *
      * @return The adapter that has been set on this view.
-     * @see #setAdapter(BaseCircularViewAdapter)
      */
     public BaseCircularViewAdapter getAdapter() {
         return mAdapter;
@@ -381,9 +383,9 @@ public class CircularView extends View {
 
     /**
      * Gets the text for this view.
+     * See R.styleable#CircularView_text
      *
      * @return The text for this view.
-     * @attr ref R.styleable#CircularView_text
      */
     public String getText() {
         return mText;
@@ -391,9 +393,9 @@ public class CircularView extends View {
 
     /**
      * Sets the view's text.
+     * See R.styleable#CircularView_text
      *
      * @param text The view's text.
-     * @attr ref R.styleable#CircularView_text
      */
     public void setText(String text) {
         mText = text;
@@ -402,9 +404,9 @@ public class CircularView extends View {
 
     /**
      * Gets the example dimension attribute value.
+     * See R.styleable#CircularView_textSize
      *
      * @return The example dimension attribute value.
-     * @attr ref R.styleable#CircularView_textSize
      */
     public float getTextSize() {
         return mTextPaint.getTextSize();
@@ -414,9 +416,9 @@ public class CircularView extends View {
      * Set the default text size to the given value, interpreted as "scaled
      * pixel" units.  This size is adjusted based on the current density and
      * user font size preference.
+     * See R.styleable#CircularView_textSize
      *
      * @param size The scaled pixel size.
-     * @attr ref R.styleable#CircularView_textSize
      */
     public void setTextSize(float size) {
         setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
@@ -425,10 +427,10 @@ public class CircularView extends View {
     /**
      * Set the default text size to a given unit and value.  See {@link
      * TypedValue} for the possible dimension units.
+     * See R.styleable#CircularView_textSize
      *
      * @param unit The desired dimension unit.
      * @param size The desired size in the given units.
-     * @attr ref R.styleable#CircularView_textSize
      */
     public void setTextSize(int unit, float size) {
         Context c = getContext();
@@ -456,9 +458,9 @@ public class CircularView extends View {
      * as well as r,g,b. This 32bit value is not premultiplied, meaning that
      * its alpha can be any value, regardless of the values of r,g,b.
      * See the Color class for more details.
+     * See R.styleable#CircularView_textColor
      *
      * @param color The new color (including alpha) to set for the text.
-     * @attr ref R.styleable#CircularView_textColor
      */
     public void setTextColor(int color) {
         if (mTextPaint.getColor() != color) {
@@ -473,9 +475,9 @@ public class CircularView extends View {
      * containing alpha as well as r,g,b. This 32bit value is not premultiplied,
      * meaning that its alpha can be any value, regardless of the values of
      * r,g,b. See the Color class for more details.
+     * See R.styleable#CircularView_textColor
      *
      * @return the text's color (and alpha).
-     * @attr ref R.styleable#CircularView_textColor
      */
     public int getTextColor() {
         return mTextPaint.getColor();
@@ -483,9 +485,9 @@ public class CircularView extends View {
 
     /**
      * Get the degree that is currently highlighted.
+     * See R.styleable#CircularView_highlightedDegree
      *
      * @return The highlighted degree
-     * @attr ref R.styleable#CircularView_highlightedDegree
      */
     public float getHighlightedDegree() {
         return mHighlightedDegree;
@@ -493,9 +495,9 @@ public class CircularView extends View {
 
     /**
      * Set the degree that will trigger highlighting a marker. You can also set {@link #HIGHLIGHT_NONE} to not highlight any degree.
+     * See R.styleable#CircularView_highlightedDegree
      *
      * @param highlightedDegree Value in degrees.
-     * @attr ref R.styleable#CircularView_highlightedDegree
      */
     public void setHighlightedDegree(final float highlightedDegree) {
         this.mHighlightedDegree = highlightedDegree;
@@ -533,9 +535,9 @@ public class CircularView extends View {
     /**
      * Check if a marker should animate when it is highlighted. By default this is false and when it is
      * set to true the marker will constantly be animating.
+     * See R.styleable#CircularView_animateMarkersOnStillHighlight
      *
      * @return True if a marker should animate when it is highlighted, false if not.
-     * @attr ref R.styleable#CircularView_animateMarkersOnStillHighlight
      * @see #setHighlightedDegree(float)
      */
     public boolean isAnimateMarkerOnStillHighlight() {
@@ -545,9 +547,9 @@ public class CircularView extends View {
     /**
      * If set to true the marker that is highlighted with {@link #setHighlightedDegree(float)} will
      * animate continuously when the highlight degree is not animating. This is set to false by default.
+     * See R.styleable#CircularView_animateMarkersOnStillHighlight
      *
      * @param animateMarkerOnHighlight True to continuously animate, false to turn it off.
-     * @attr ref R.styleable#CircularView_animateMarkersOnStillHighlight
      */
     public void setAnimateMarkerOnStillHighlight(boolean animateMarkerOnHighlight) {
         this.mAnimateMarkersOnStillHighlight = animateMarkerOnHighlight;
@@ -579,9 +581,9 @@ public class CircularView extends View {
 
     /**
      * Returns the flag the determines if the highlighted marker will draw on top of other markers.
+     * See R.styleable#CircularView_drawHighlightedMarkerOnTop
      *
      * @return True if the highlighted marker will draw on top of other markers, false if they're all drawn in order.
-     * @attr ref R.styleable#CircularView_drawHighlightedMarkerOnTop
      */
     public boolean isDrawHighlightedMarkerOnTop() {
         return mDrawHighlightedMarkerOnTop;
@@ -590,13 +592,17 @@ public class CircularView extends View {
     /**
      * Set the flag that determines if the highlighted marker will draw on top of other markers.
      * This is false by default.
+     * See R.styleable#CircularView_drawHighlightedMarkerOnTop
      *
      * @param drawHighlightedMarkerOnTop the flag that determines if the highlighted marker will draw on top of other markers.
-     * @attr ref R.styleable#CircularView_drawHighlightedMarkerOnTop
      */
     public void setDrawHighlightedMarkerOnTop(boolean drawHighlightedMarkerOnTop) {
         this.mDrawHighlightedMarkerOnTop = drawHighlightedMarkerOnTop;
     }
+
+    private boolean mLongClickRegistered = false;
+    private Marker mTouchEventMarker = null;
+    private Integer mTouchEventMarkerPos = null;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -606,25 +612,31 @@ public class CircularView extends View {
         if (mMarkerList != null) {
             // check to see if the highlighted marker is on top. If so, check it before the other markers.
             boolean highlightedMarkerHandlesEvent = false;
-            if(mHighlightedMarker != null && mDrawHighlightedMarkerOnTop) {
+            if (mHighlightedMarker != null && mDrawHighlightedMarkerOnTop) {
                 final int status = mHighlightedMarker.onTouchEvent(event);
                 if (status >= 0) {
                     handled = status != MotionEvent.ACTION_MOVE;
+                    mTouchEventMarker = mHighlightedMarker;
+                    mTouchEventMarkerPos = mHighlightedMarkerPosition;
                     if (status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
-                        playSoundEffect(SoundEffectConstants.CLICK);
-                        mOnCircularViewObjectClickListener.onMarkerClick(this, mHighlightedMarker, mHighlightedMarkerPosition);
+                        if (mLongClickRegistered) {
+                            mLongClickRegistered = false;
+                        } else {
+                            playSoundEffect(SoundEffectConstants.CLICK);
+                            mOnCircularViewObjectClickListener.onMarkerClick(this, mHighlightedMarker, mHighlightedMarkerPosition, false);
+                        }
                     }
                     highlightedMarkerHandlesEvent = true;
                 }
             }
 
-            if(!highlightedMarkerHandlesEvent) {
+            if (!highlightedMarkerHandlesEvent) {
                 final int size = mMarkerList.size();
                 // Since markers are drawn first to last, the last marker will be on top, so search
                 // for a click from last to first.
 
                 for (int i = size - 1; i > -1; i--) {
-                    if(mDrawHighlightedMarkerOnTop && i == mHighlightedMarkerPosition) {
+                    if (mDrawHighlightedMarkerOnTop && i == mHighlightedMarkerPosition) {
                         // If the marker is to be drawn on top then it will have already been checked
                         // by this point. Don't check it again.
                         continue;
@@ -633,9 +645,15 @@ public class CircularView extends View {
                     final int status = marker.onTouchEvent(event);
                     if (status >= 0) {
                         handled = status != MotionEvent.ACTION_MOVE;
+                        mTouchEventMarker = marker;
+                        mTouchEventMarkerPos = i;
                         if (status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
-                            playSoundEffect(SoundEffectConstants.CLICK);
-                            mOnCircularViewObjectClickListener.onMarkerClick(this, marker, i);
+                            if (mLongClickRegistered) {
+                                mLongClickRegistered = false;
+                            } else {
+                                playSoundEffect(SoundEffectConstants.CLICK);
+                                mOnCircularViewObjectClickListener.onMarkerClick(this, marker, i, false);
+                            }
                         }
                         break;
                     }
@@ -648,16 +666,42 @@ public class CircularView extends View {
             final int status = mCircle.onTouchEvent(event);
             if (status >= 0) {
                 handled = true;
+                mTouchEventMarker = null;
+                mTouchEventMarkerPos = -1;
                 if (status == MotionEvent.ACTION_UP && mOnCircularViewObjectClickListener != null) {
-                    playSoundEffect(SoundEffectConstants.CLICK);
-                    mOnCircularViewObjectClickListener.onClick(this);
+                    if (mLongClickRegistered) {
+                        mLongClickRegistered = false;
+                    } else {
+                        playSoundEffect(SoundEffectConstants.CLICK);
+                        mOnCircularViewObjectClickListener.onClick(this, false);
+                    }
                 }
             }
         }
 
-
-        return handled || super.onTouchEvent(event);
+        return super.onTouchEvent(event);
     }
+
+    private OnLongClickListener mOnLongClickListener = new OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            if (mOnCircularViewObjectClickListener != null && isLongClickable()) {
+                mLongClickRegistered = true;
+                if (mTouchEventMarkerPos == -1) {
+                    playSoundEffect(SoundEffectConstants.CLICK);
+                    mOnCircularViewObjectClickListener.onClick(CircularView.this, true);
+                    mTouchEventMarkerPos = null;
+                } else if (mTouchEventMarker != null) {
+                    playSoundEffect(SoundEffectConstants.CLICK);
+                    mOnCircularViewObjectClickListener.onMarkerClick(CircularView.this, mTouchEventMarker, mTouchEventMarkerPos, true);
+                    mTouchEventMarker = null;
+                    mTouchEventMarkerPos = null;
+                }
+                return mLongClickRegistered;
+            }
+            return false;
+        }
+    };
 
     /**
      * Set the click listener that will receive a callback when the center circle is clicked.
@@ -742,9 +786,9 @@ public class CircularView extends View {
 
     /**
      * Get the starting point for the markers.
+     * See R.styleable#CircularView_markerStartingPoint
      *
      * @return The starting point for the markers.
-     * @attr ref R.styleable#CircularView_markerStartingPoint
      */
     public float getMarkerStartingPoint() {
         return mMarkerStartingPoint;
@@ -752,9 +796,9 @@ public class CircularView extends View {
 
     /**
      * Set the starting point for the markers
+     * See R.styleable#CircularView_markerStartingPoint
      *
      * @param startingPoint Starting point for the markers
-     * @attr ref R.styleable#CircularView_markerStartingPoint
      */
     public void setMarkerStartingPoint(final float startingPoint) {
         mMarkerStartingPoint = startingPoint;
@@ -801,18 +845,20 @@ public class CircularView extends View {
         /**
          * Called when the center view object has been clicked.
          *
-         * @param view The circular view that was clicked.
+         * @param view        The circular view that was clicked.
+         * @param isLongClick True if this click is coming from a long click, false if not.
          */
-        public void onClick(CircularView view);
+        public void onClick(CircularView view, boolean isLongClick);
 
         /**
          * Called when a marker is clicked.
          *
-         * @param view     The circular view that the marker belongs to
-         * @param marker   The marker that was clicked.
-         * @param position The position of the marker in the adapter
+         * @param view        The circular view that the marker belongs to
+         * @param marker      The marker that was clicked.
+         * @param position    The position of the marker in the adapter
+         * @param isLongClick True if this click is coming from a long click, false if not.
          */
-        public void onMarkerClick(CircularView view, Marker marker, int position);
+        public void onMarkerClick(CircularView view, Marker marker, int position, boolean isLongClick);
     }
 
     /**

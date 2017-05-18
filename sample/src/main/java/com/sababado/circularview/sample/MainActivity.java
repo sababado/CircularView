@@ -37,23 +37,31 @@ public class MainActivity extends Activity {
 
         circularView.setOnCircularViewObjectClickListener(new CircularView.OnClickListener() {
             @Override
-            public void onClick(final CircularView view) {
-                Toast.makeText(MainActivity.this, "Clicked center", Toast.LENGTH_SHORT).show();
+            public void onClick(final CircularView view, boolean isLongClick) {
+                if (isLongClick) {
+                    Toast.makeText(MainActivity.this, "Long Clicked Center", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Clicked center", Toast.LENGTH_SHORT).show();
 
-                // Start animation from the bottom of the circle, going clockwise.
-                final float start = CircularView.BOTTOM;
-                final float end = start + 360f + (float) (Math.random() * 720f);
-                // animate the highlighted degree value but also make sure it isn't so fast that it's skipping marker animations.
-                final long duration = (long) (Marker.ANIMATION_DURATION * 2L * end / (270L - mAdapter.getCount()));
+                    // Start animation from the bottom of the circle, going clockwise.
+                    final float start = CircularView.BOTTOM;
+                    final float end = start + 360f + (float) (Math.random() * 720f);
+                    // animate the highlighted degree value but also make sure it isn't so fast that it's skipping marker animations.
+                    final long duration = (long) (Marker.ANIMATION_DURATION * 2L * end / (270L - mAdapter.getCount()));
 
-                circularView.animateHighlightedDegree(start, end, duration);
+                    circularView.animateHighlightedDegree(start, end, duration);
+                }
             }
 
-            public void onMarkerClick(CircularView view, Marker marker, int position) {
-                Toast.makeText(MainActivity.this, "Clicked " + marker.getId(), Toast.LENGTH_SHORT).show();
-                marker.setVisibility(marker.getVisibility() == View.INVISIBLE || marker.getVisibility() == View.GONE ? View.VISIBLE : View.INVISIBLE);
-                circularView.setTextSize(24+position);
-                circularView.setTextColor(Color.BLACK);
+            public void onMarkerClick(CircularView view, Marker marker, int position, boolean isLongClick) {
+                if (isLongClick) {
+                    Toast.makeText(MainActivity.this, "Long Clicked " + marker.getId(), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Clicked " + marker.getId(), Toast.LENGTH_SHORT).show();
+                    marker.setVisibility(marker.getVisibility() == View.INVISIBLE || marker.getVisibility() == View.GONE ? View.VISIBLE : View.INVISIBLE);
+                    circularView.setTextSize(24 + position);
+                    circularView.setTextColor(Color.BLACK);
+                }
             }
         });
 

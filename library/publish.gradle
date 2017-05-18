@@ -1,0 +1,36 @@
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'com.sababado.circularview:library'   // Has to be same as your library module name
+
+    publishedGroupId = 'com.sababado.circularview'
+    libraryName = 'CircularView'
+    artifact = 'library'     // Has to be same as your library module name
+
+    libraryDescription = 'A custom view with a large center that can be wrapped by dynamic markers.'
+
+    // Your github repo link
+    siteUrl = 'https://github.com/sababado/CircularView'
+    gitUrl = 'https://github.com/sababado/CircularView.git'
+    githubRepository= 'sababado/CircularView'
+
+    libraryVersion = '1.1.1'
+
+    binUser = 'rat141312'
+    developerId = 'sababado'
+    developerName = 'Robert Szabo'
+    developerEmail = 'robert.james.szabo@gmail.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+
+    binKey = getBintrayPwd()
+    binGpg = getBintrayGpg()
+}
+
+// Place it at the end of the file
+apply from: 'install.gradle'
+apply from: 'bintray.gradle'
+
+//apply from: 'https://raw.githubusercontent.com/nisrulz/JCenter/master/installv1.gradle'
+//apply from: 'https://raw.githubusercontent.com/nisrulz/JCenter/master/bintrayv1.gradle'
