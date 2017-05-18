@@ -17,5 +17,5 @@ android {
 }
 
 dependencies {
-    compile project(':lib')
+    compile 'com.sababado.circularview:library:1.1.+'
 }

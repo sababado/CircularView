@@ -19,5 +19,9 @@ android {
     }
 }
 
+configurations {
+    javadocDeps
+}
+
 //apply from: '../mvn_push.gradle'
 apply from: 'publish.gradle'
