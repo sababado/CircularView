@@ -685,7 +685,7 @@ public class CircularView extends View {
     private OnLongClickListener mOnLongClickListener = new OnLongClickListener() {
         @Override
         public boolean onLongClick(View v) {
-            if (isLongClickable()) {
+            if (mOnCircularViewObjectClickListener != null && isLongClickable()) {
                 mLongClickRegistered = true;
                 if (mTouchEventMarkerPos == -1) {
                     playSoundEffect(SoundEffectConstants.CLICK);
